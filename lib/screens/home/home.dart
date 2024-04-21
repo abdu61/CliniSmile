@@ -16,7 +16,7 @@ class Home extends StatelessWidget {
             fontWeight: FontWeight.bold,
             fontSize: 25.0,
           ),
-          child: Text('Toothly'),
+          child: Text('CliniSmile'),
         ),
         backgroundColor: Color(0xFF254EDB),
         elevation: 0.0,

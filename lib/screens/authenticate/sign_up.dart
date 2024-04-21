@@ -30,7 +30,7 @@ class _RegisterState extends State<SignUp> {
             child: Column(
               children: [
                 const Text(
-                  'Sign Up to Toothly',
+                  'Sign Up to CliniSmile',
                   style: TextStyle(
                     fontSize: 30.0, // Change the font size
                     fontWeight: FontWeight.bold, // Make the text bold
