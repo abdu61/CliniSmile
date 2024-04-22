@@ -1,5 +1,6 @@
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/shared/constant.dart';
+import 'package:dental_clinic/services/database.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +17,14 @@ class _RegisterState extends State<SignUp> {
   final _formKey = GlobalKey<FormState>();
 
   // text field state
+  String name = '';
   String email = '';
+  String phone = '';
   String password = '';
+
+  // Password visibility state
+  bool showPassword = false;
+
   String error = '';
   @override
   Widget build(BuildContext context) {
@@ -51,6 +58,18 @@ class _RegisterState extends State<SignUp> {
                     children: <Widget>[
                       const SizedBox(height: 20.0),
 
+                      //Name TextFormField
+                      TextFormField(
+                        validator: (val) =>
+                            val!.isEmpty ? 'Enter a name' : null,
+                        onChanged: (val) {
+                          setState(() => name = val);
+                        },
+                        decoration:
+                            textInputDecoration.copyWith(hintText: 'Name'),
+                      ),
+                      const SizedBox(height: 20.0),
+
                       //Email TextFormField
                       TextFormField(
                         validator: (val) {
@@ -71,9 +90,22 @@ class _RegisterState extends State<SignUp> {
                       ),
                       const SizedBox(height: 20.0),
 
+                      //Phone TextFormField
+                      TextFormField(
+                        validator: (val) => val!.length != 8
+                            ? 'Enter a valid phone number'
+                            : null,
+                        onChanged: (val) {
+                          setState(() => phone = val);
+                        },
+                        decoration:
+                            textInputDecoration.copyWith(hintText: 'Phone'),
+                      ),
+                      const SizedBox(height: 20.0),
+
                       //Password TextFormField
                       TextFormField(
-                        obscureText: true,
+                        obscureText: !showPassword,
                         validator: (val) {
                           if (val != null && val.length < 8) {
                             return 'Password must be 8+ characters.';
@@ -101,6 +133,21 @@ class _RegisterState extends State<SignUp> {
                           hintText: 'Password',
                           helperText:
                               'Password must contain at least 8 characters,\none uppercase, one lowercase letter,\none no and one special character',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              // Based on passwordVisible state choose the icon
+                              showPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Theme.of(context).primaryColorDark,
+                            ),
+                            onPressed: () {
+                              // Update the state i.e. toogle the state of passwordVisible variable
+                              setState(() {
+                                showPassword = !showPassword;
+                              });
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20.0),
@@ -111,11 +158,12 @@ class _RegisterState extends State<SignUp> {
                         onPressed: () async {
                           //Registration
                           if (_formKey.currentState!.validate()) {
-                            dynamic result = await _auth
-                                .registerWithEmailAndPassword(email, password);
+                            dynamic result =
+                                await _auth.registerWithEmailAndPassword(
+                                    name, email, phone, password);
                             if (result == null) {
                               setState(() => error =
-                                  'Oops! Please enter a valid email address');
+                                  'Oops! Please enter valid information');
                             }
                           }
                         },
