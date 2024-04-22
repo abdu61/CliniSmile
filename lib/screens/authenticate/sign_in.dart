@@ -17,12 +17,23 @@ class _SignInState extends State<SignIn> {
   final _formKey = GlobalKey<FormState>();
 
   // text field state
-  String email = '';
-  String password = '';
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   String error = '';
 
   //Loading state
   bool loading = false;
+
+  // Password visibility state
+  bool showPassword = false;
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +74,7 @@ class _SignInState extends State<SignIn> {
 
                               //Email TextFormField
                               TextFormField(
+                                controller: emailController,
                                 validator: (val) {
                                   Pattern pattern =
                                       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -73,9 +85,6 @@ class _SignInState extends State<SignIn> {
                                     return null;
                                   }
                                 },
-                                onChanged: (val) {
-                                  setState(() => email = val);
-                                },
                                 decoration: textInputDecoration.copyWith(
                                     hintText: 'Email'),
                               ),
@@ -83,15 +92,28 @@ class _SignInState extends State<SignIn> {
 
                               //Password TextFormField
                               TextFormField(
-                                obscureText: true,
+                                controller: passwordController,
+                                obscureText: !showPassword,
                                 validator: (val) => val != null && val.isEmpty
                                     ? 'Please enter your password.'
                                     : null,
-                                onChanged: (val) {
-                                  setState(() => password = val);
-                                },
                                 decoration: textInputDecoration.copyWith(
                                   hintText: 'Password',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      // Based on passwordVisible state choose the icon
+                                      showPassword
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                      color: Theme.of(context).primaryColorDark,
+                                    ),
+                                    onPressed: () {
+                                      // Update the state i.e. toogle the state of passwordVisible variable
+                                      setState(() {
+                                        showPassword = !showPassword;
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 20.0),
@@ -104,7 +126,8 @@ class _SignInState extends State<SignIn> {
                                     setState(() => loading = true);
                                     dynamic result =
                                         await _auth.signInWithEmailAndPassword(
-                                            email, password);
+                                            emailController.text,
+                                            passwordController.text);
                                     if (result == null) {
                                       if (mounted) {
                                         setState(() {

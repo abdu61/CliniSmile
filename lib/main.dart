@@ -24,9 +24,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<Users?>.value(
-      initialData: null, // Provide an initial value of type 'Users'
-      value: AuthService().user,
+    return MultiProvider(
+      providers: [
+        Provider<AuthService>(
+          create: (_) => AuthService(),
+        ),
+        StreamProvider<Users?>.value(
+          initialData: null, // Provide an initial value of type 'Users'
+          value: AuthService().user,
+        ),
+      ],
       child: MaterialApp(
         theme: ThemeData(
           primaryColor: Color(0xFF254EDB), // Use hexadecimal color
