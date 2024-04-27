@@ -1,10 +1,10 @@
 import 'package:dental_clinic/models/user.dart';
-import 'package:dental_clinic/screens/admin/admin_home.dart';
+import 'package:dental_clinic/navigation/admin_nav.dart';
+import 'package:dental_clinic/navigation/guest_nav.dart';
+import 'package:dental_clinic/navigation/staff_nav.dart';
 import 'package:dental_clinic/screens/authenticate/authenticate.dart';
-import 'package:dental_clinic/screens/guest/guest_home.dart';
-import 'package:dental_clinic/screens/home/home.dart';
-import 'package:dental_clinic/screens/staff/staff_home.dart';
 import 'package:dental_clinic/services/auth.dart';
+import 'package:dental_clinic/navigation/customer_nav.dart';
 import 'package:dental_clinic/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -33,13 +33,13 @@ class Wrapper extends StatelessWidget {
             // Navigate to respective page based on user role
             switch (snapshot.data) {
               case 'admin':
-                return AdminHome();
+                return AdminNav();
               case 'staff':
-                return StaffHome();
-              case 'guest':
-                return GuestHome();
-              default: // 'customer' or any other role
-                return Home();
+                return StaffNav();
+              case 'Customer':
+                return CustomerNav();
+              default: // 'guest' or any other role
+                return GuestNav();
             }
           }
         },

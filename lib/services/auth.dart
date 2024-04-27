@@ -18,7 +18,6 @@ class AuthService {
   }
 
   // sign in anonymously
-  // sign in anonymously
   Future<String?> signInAnon() async {
     try {
       final userCredential = await _auth.signInAnonymously();
@@ -81,7 +80,6 @@ class AuthService {
     }
   }
 
-  //sign out
   //sign out
   Future<void> signOut() async {
     try {

@@ -54,6 +54,9 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
+            body: const Center(
+              child: Text('Home'),
+            ),
           );
   }
 }
