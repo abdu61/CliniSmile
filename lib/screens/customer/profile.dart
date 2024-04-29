@@ -1,3 +1,4 @@
+import 'package:dental_clinic/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatefulWidget {
@@ -8,6 +9,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final AuthService _auth = AuthService();
+  bool loading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,8 +23,33 @@ class _ProfileState extends State<Profile> {
           ),
           child: Text('Profile'),
         ),
-        backgroundColor: Color(0xFF254EDB),
+        backgroundColor: const Color(0xFF254EDB),
         elevation: 0.0,
+        //sign out button
+        actions: <Widget>[
+          TextButton.icon(
+            onPressed: () async {
+              //sign out
+              setState(() => loading = true);
+              await _auth.signOut();
+              if (mounted) {
+                setState(() => loading = false);
+              }
+            },
+            icon: const Icon(
+              Icons.person,
+              color: Colors.white,
+            ),
+            label: const Text(
+              'logout',
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
       body: const Center(
         child: Text('Profile'),

@@ -28,7 +28,7 @@ class AdminNav extends StatelessWidget {
             ),
           ],
           backgroundColor: Colors.white,
-          indicatorColor: Color.fromARGB(255, 113, 146, 255),
+          indicatorColor: const Color.fromARGB(255, 152, 176, 255),
         ),
       ),
       body: Obx(() => controller.screens[controller.selectedIndex.value]),

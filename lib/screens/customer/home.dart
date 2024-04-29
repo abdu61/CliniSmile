@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dental_clinic/services/auth.dart';
+import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -10,53 +13,158 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final AuthService _auth = AuthService();
+  final AuthService auth = AuthService();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   bool loading = false;
+  late Future<String> userName;
+
+  @override
+  void initState() {
+    super.initState();
+    userName = getUserName();
+  }
+
+  Future<String> getUserName() async {
+    final User? user = _firebaseAuth.currentUser;
+    final DatabaseService db = DatabaseService(uid: user?.uid ?? '');
+    final DocumentSnapshot docSnapshot = await db.getUserData();
+    return (docSnapshot.data() as Map<String, dynamic>)['name'] ?? 'User';
+  }
 
   @override
   Widget build(BuildContext context) {
     return loading
-        ? Loading() // Show Loading widget when logging out
-        : Scaffold(
-            appBar: AppBar(
-              title: const DefaultTextStyle(
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25.0,
-                ),
-                child: Text('CliniSmile'),
-              ),
-              backgroundColor: Color(0xFF254EDB),
-              elevation: 0.0,
-              actions: <Widget>[
-                TextButton.icon(
-                  onPressed: () async {
-                    //sign out
-                    setState(() => loading = true);
-                    await _auth.signOut();
-                    if (mounted) {
-                      setState(() => loading = false);
+        ? const Loading() // Show Loading widget when logging out
+        : SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                toolbarHeight: 70,
+                title: FutureBuilder<String>(
+                  future: userName,
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Loading();
+                    } else {
+                      final hour = DateTime.now().hour;
+                      String greeting;
+                      if (hour < 12) {
+                        greeting = 'Good morning';
+                      } else if (hour < 17) {
+                        greeting = 'Good afternoon';
+                      } else {
+                        greeting = 'Good evening';
+                      }
+                      return Container(
+                        margin: const EdgeInsets.only(left: 10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 5), // Add some space (5px
+                            Text(
+                              greeting, // Greeting message
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color.fromARGB(255, 145, 145, 145),
+                              ),
+                            ),
+                            Text(
+                              '${snapshot.data}', // User's name
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'May your smile be ever bright!', // Dental quote
+                              style: TextStyle(
+                                  fontSize: 12, fontStyle: FontStyle.italic),
+                            ),
+                          ],
+                        ),
+                      );
                     }
                   },
-                  icon: const Icon(
-                    Icons.person,
-                    color: Colors.white,
+                ),
+                actions: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Colors.grey.shade400,
+                          width: 1), // Set your desired color and width
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Navigate to the notification page
+                        Navigator.pushNamed(context, '/notification');
+                      },
+                      child: const Icon(Icons.notifications_none_outlined,
+                          size: 28),
+                    ),
                   ),
-                  label: const Text(
-                    'logout',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(width: 12),
+                ],
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(55.0),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(18.0, 0.0, 18.0, 4.0),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(2.0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromRGBO(189, 189, 189, 1)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF254EDB)),
+                        ),
+                        hintText: 'Search for doctors...',
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Color.fromARGB(255, 152, 176, 255),
+                        ),
+                        suffixIcon: Container(
+                          margin: const EdgeInsets.all(6.0),
+                          padding: const EdgeInsets.all(4.0),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 152, 176, 255),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: const Icon(
+                            Icons.filter_alt_outlined,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
-            body: const Center(
-              child: Text('Home'),
+              ),
+              body: SingleChildScrollView(
+                padding: EdgeInsets.all(10.0),
+                child: Column(
+                  children: [
+                    _DoctorCategory(),
+                  ],
+                ),
+              ),
             ),
           );
+  }
+}
+
+class _DoctorCategory extends StatelessWidget {
+  const _DoctorCategory({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
