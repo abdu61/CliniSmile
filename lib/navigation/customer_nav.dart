@@ -22,23 +22,23 @@ class CustomerNav extends StatelessWidget {
               controller.selectedIndex.value = index,
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.calendar_today),
+              icon: Icon(Icons.edit_calendar_outlined),
               label: 'Appointment',
             ),
             NavigationDestination(
-              icon: Icon(Icons.feed),
+              icon: Icon(Icons.feed_outlined),
               label: 'Feed',
             ),
             NavigationDestination(
-              icon: Icon(Icons.chat),
+              icon: Icon(Icons.chat_outlined),
               label: 'Chat',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person),
+              icon: Icon(Icons.person_outline_rounded),
               label: 'Profile',
             ),
           ],

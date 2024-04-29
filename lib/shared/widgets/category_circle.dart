@@ -14,14 +14,13 @@ class CategoryCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: const Color.fromARGB(255, 191, 206, 255),
+            backgroundColor: const Color.fromRGBO(191, 206, 255, 1),
             foregroundColor: Colors.black,
             child: Icon(icon),
           ),

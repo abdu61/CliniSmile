@@ -3,6 +3,7 @@ import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
+import 'package:dental_clinic/shared/widgets/cards/AppointmentPreviewCard.dart';
 import 'package:dental_clinic/shared/widgets/category_circle.dart';
 import 'package:dental_clinic/shared/widgets/section_title.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -58,39 +59,39 @@ class _HomeState extends State<Home> {
                       } else {
                         greeting = 'Good evening';
                       }
-                      return Container(
-                        margin: const EdgeInsets.only(left: 5.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 5), // Add some space (5px
-                            Text(
-                              greeting, // Greeting message
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color.fromARGB(255, 145, 145, 145),
-                              ),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 5),
+                          Text(
+                            greeting, // Greeting message
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color.fromARGB(255, 145, 145, 145),
                             ),
-                            Text(
-                              '${snapshot.data}', // User's name
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '${snapshot.data}', // User's name
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'May your smile be ever bright!', // Dental quote
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                              color: Color(0xFFc42d5e),
                             ),
-                            const SizedBox(height: 2),
-                            const Text(
-                              'May your smile be ever bright!', // Dental quote
-                              style: TextStyle(
-                                  fontSize: 12, fontStyle: FontStyle.italic),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       );
                     }
                   },
                 ),
+                // Notification icon
                 actions: [
                   Container(
-                    margin: const EdgeInsets.only(right: 8.0),
                     decoration: BoxDecoration(
                       border: Border.all(
                           color: Colors.grey.shade400,
@@ -108,10 +109,11 @@ class _HomeState extends State<Home> {
                   ),
                   const SizedBox(width: 12),
                 ],
+                // Search bar
                 bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(55.0),
+                  preferredSize: const Size.fromHeight(60.0),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18.0, 0.0, 18.0, 4.0),
+                    padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                     child: TextFormField(
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(2.0),
@@ -133,11 +135,12 @@ class _HomeState extends State<Home> {
                           Icons.search,
                           color: Color.fromARGB(255, 152, 176, 255),
                         ),
+                        // Filter icon
                         suffixIcon: Container(
                           margin: const EdgeInsets.all(6.0),
                           padding: const EdgeInsets.all(4.0),
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 152, 176, 255),
+                            color: const Color.fromARGB(255, 194, 194, 194),
                             borderRadius: BorderRadius.circular(4.0),
                           ),
                           child: const Icon(
@@ -154,7 +157,11 @@ class _HomeState extends State<Home> {
                 padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                 child: Column(
                   children: [
+                    _MyAppointment(),
+                    const SizedBox(height: 10),
                     _DoctorCategory(),
+                    const SizedBox(height: 10),
+                    _TopDoctors(),
                   ],
                 ),
               ),
@@ -163,9 +170,26 @@ class _HomeState extends State<Home> {
   }
 }
 
-// Doctor Category - Shows upto 5 Categories
+// Appointment Preview Cards
+class _MyAppointment extends StatelessWidget {
+  const _MyAppointment({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      SectionTitle(
+        title: 'My Appointments',
+        action: 'View all',
+        onPressed: () {},
+      ),
+      AppointmentPreviewCard(),
+    ]);
+  }
+}
+
+// Doctor Category - Shows upto 4 Categories
 class _DoctorCategory extends StatelessWidget {
-  const _DoctorCategory({Key? key}) : super(key: key);
+  const _DoctorCategory({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -182,12 +206,12 @@ class _DoctorCategory extends StatelessWidget {
             children: [
               SectionTitle(
                 title: 'Categories',
-                action: 'See all',
+                action: 'View all',
                 onPressed: () {},
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: snapshot.data!.take(5).map((category) {
+                children: snapshot.data!.take(4).map((category) {
                   IconData iconData;
                   try {
                     iconData = IconData(int.parse(category.icon),
@@ -207,6 +231,24 @@ class _DoctorCategory extends StatelessWidget {
           );
         }
       },
+    );
+  }
+}
+
+// Top Doctors - Shows upto 5 Doctors
+class _TopDoctors extends StatelessWidget {
+  const _TopDoctors({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SectionTitle(
+          title: 'Our Doctors',
+          action: 'View all',
+          onPressed: () {},
+        ),
+      ],
     );
   }
 }

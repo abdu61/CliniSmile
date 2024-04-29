@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'CliniSmile',
         theme: ThemeData(
-          primaryColor: const Color(0xFF254EDB), // Use hexadecimal color
+          primaryColor: const Color(0xFF254EDB),
         ),
         home: Wrapper(),
       ),
