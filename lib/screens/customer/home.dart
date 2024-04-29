@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
+import 'package:dental_clinic/shared/widgets/category_circle.dart';
+import 'package:dental_clinic/shared/widgets/section_title.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -56,7 +59,7 @@ class _HomeState extends State<Home> {
                         greeting = 'Good evening';
                       }
                       return Container(
-                        margin: const EdgeInsets.only(left: 10.0),
+                        margin: const EdgeInsets.only(left: 5.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -148,7 +151,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               body: SingleChildScrollView(
-                padding: EdgeInsets.all(10.0),
+                padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                 child: Column(
                   children: [
                     _DoctorCategory(),
@@ -160,11 +163,50 @@ class _HomeState extends State<Home> {
   }
 }
 
+// Doctor Category - Shows upto 5 Categories
 class _DoctorCategory extends StatelessWidget {
-  const _DoctorCategory({super.key});
+  const _DoctorCategory({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    final databaseService = DatabaseService(uid: 'your_uid_here');
+    return FutureBuilder<List<Category>>(
+      future: databaseService.getCategories(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          return Column(
+            children: [
+              SectionTitle(
+                title: 'Categories',
+                action: 'See all',
+                onPressed: () {},
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: snapshot.data!.take(5).map((category) {
+                  IconData iconData;
+                  try {
+                    iconData = IconData(int.parse(category.icon),
+                        fontFamily: 'MaterialIcons');
+                  } catch (e) {
+                    iconData = Icons.error; // Default icon in case of error
+                  }
+                  return Expanded(
+                    child: CategoryCircle(
+                      icon: iconData,
+                      label: category.name,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 }
