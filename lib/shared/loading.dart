@@ -10,7 +10,7 @@ class Loading extends StatelessWidget {
       color: Colors.white,
       child: const Center(
           child: SpinKitCubeGrid(
-        color: Color(0xFF254EDB),
+        color: Color.fromARGB(255, 136, 164, 255),
         size: 50.0,
       )),
     );
