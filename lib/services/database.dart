@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/models/doctor.dart';
-import 'package:dental_clinic/models/doctor_package.dart';
-import 'package:dental_clinic/models/doctor_working_hours.dart';
 
 class DatabaseService {
   final String uid;
@@ -15,10 +13,6 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('categories');
   final CollectionReference _doctorsCollection =
       FirebaseFirestore.instance.collection('doctors');
-  final CollectionReference _doctorPackagesCollection =
-      FirebaseFirestore.instance.collection('doctorPackages');
-  final CollectionReference _doctorWorkingHoursCollection =
-      FirebaseFirestore.instance.collection('doctorWorkingHours');
 
   Future<void> updateUserData(
       String name, String email, String phone, String role) async {
@@ -45,17 +39,32 @@ class DatabaseService {
   //Doctor Categories
   Future<List<Category>> getCategories() async {
     final snapshot = await _categoriesCollection.get();
-    return snapshot.docs
-        .map((doc) => Category(
-              id: doc.id,
-              name: doc['name'],
-              icon: doc['icon'],
-            ))
-        .toList();
+    return snapshot.docs.map((doc) {
+      return Category(
+        id: doc.id,
+        name: doc['name'],
+        icon: doc['icon'],
+      );
+    }).toList();
+  }
+
+  Future<Category> getCategoryById(String id) async {
+    final doc = await _categoriesCollection.doc(id).get();
+
+    if (!doc.exists) {
+      throw Exception('No category found with ID: $id');
+    }
+
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Category(
+      id: doc.id,
+      name: data['name'] ?? 'No name',
+      icon: data['icon'] ?? '',
+    );
   }
 
   Future<void> addCategory(Category category) {
-    return _categoriesCollection.add({
+    return _categoriesCollection.doc(category.id).set({
       'name': category.name,
       'icon': category.icon,
     });
@@ -67,83 +76,59 @@ class DatabaseService {
       'name': doctor.name,
       'bio': doctor.bio,
       'profileImageUrl': doctor.profileImageUrl,
-      'categoryId': doctor.categoryId,
-      'packageIds': doctor.packageIds,
-      'workingHourIds': doctor.workingHourIds,
+      'category': doctor.category.id,
       'rating': doctor.rating,
       'reviewCount': doctor.reviewCount,
-      'patientCount': doctor.patientCount,
+      'experience': doctor.experience,
     });
   }
 
   Future<List<Doctor>> getDoctors() async {
     final snapshot = await _doctorsCollection.get();
-    return snapshot.docs
-        .map((doc) => Doctor(
-              id: doc.id,
-              name: doc['name'],
-              bio: doc['bio'],
-              profileImageUrl: doc['profileImageUrl'],
-              categoryId: doc['categoryId'],
-              packageIds: List<String>.from(doc['packageIds']),
-              workingHourIds: List<String>.from(doc['workingHourIds']),
-              rating: doc['rating'],
-              reviewCount: doc['reviewCount'],
-              patientCount: doc['patientCount'],
-            ))
-        .toList();
-  }
 
-  Future<void> addDoctorPackage(DoctorPackage doctorPackage) {
-    return _doctorPackagesCollection.add({
-      'doctorId': doctorPackage.doctorId,
-      'packageName': doctorPackage.packageName,
-      'description': doctorPackage.description,
-      'duration': doctorPackage.duration,
-      'price': doctorPackage.price,
-      'consultationMode': doctorPackage.consultationMode,
-    });
-  }
+    List<Future<Doctor>> doctorFutures = snapshot.docs.map((doc) async {
+      try {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-  Future<List<DoctorPackage>> getDoctorPackages(String doctorId) async {
-    final snapshot = await _doctorPackagesCollection
-        .where('doctorId', isEqualTo: doctorId)
-        .get();
-    return snapshot.docs
-        .map((doc) => DoctorPackage(
-              id: doc.id,
-              doctorId: doc['doctorId'],
-              packageName: doc['packageName'],
-              description: doc['description'],
-              duration: doc['duration'],
-              price: doc['price'],
-              consultationMode: doc['consultationMode'],
-            ))
-        .toList();
-  }
+        if (!data.containsKey('name')) {
+          throw Exception('Document ${doc.id} does not contain a "name" field');
+        }
 
-  Future<void> addDoctorWorkingHours(DoctorWorkingHours doctorWorkingHours) {
-    return _doctorWorkingHoursCollection.add({
-      'doctorId': doctorWorkingHours.doctorId,
-      'startTime': doctorWorkingHours.startTime,
-      'endTime': doctorWorkingHours.endTime,
-      'dayOfWeek': doctorWorkingHours.dayOfWeek,
-    });
-  }
+        Category category;
+        try {
+          category = await getCategoryById(data['category']);
+        } catch (error) {
+          category = Category(id: '0', name: 'No category', icon: '');
+        }
 
-  Future<List<DoctorWorkingHours>> getDoctorWorkingHours(
-      String doctorId) async {
-    final snapshot = await _doctorWorkingHoursCollection
-        .where('doctorId', isEqualTo: doctorId)
-        .get();
-    return snapshot.docs
-        .map((doc) => DoctorWorkingHours(
-              id: doc.id,
-              doctorId: doc['doctorId'],
-              startTime: (doc['startTime'] as Timestamp).toDate(),
-              endTime: (doc['endTime'] as Timestamp).toDate(),
-              dayOfWeek: doc['dayOfWeek'],
-            ))
-        .toList();
+        Doctor doctor = Doctor(
+          id: doc.id,
+          name: data['name'] ?? '',
+          bio: data['bio'] ?? '',
+          profileImageUrl: data['profileImageUrl'] ?? '',
+          category: category,
+          rating: data['rating'] ?? 0.0,
+          reviewCount: data['reviewCount'] ?? 0,
+          experience: data['experience'] ?? 0,
+        );
+
+        return doctor;
+      } catch (error) {
+        return Doctor(
+          id: '',
+          name: 'Error',
+          bio: '',
+          profileImageUrl: '',
+          category: Category(id: '', name: 'error', icon: ''),
+          rating: 0.0,
+          reviewCount: 0,
+          experience: 0,
+        );
+      }
+    }).toList();
+
+    List<Doctor> doctors = await Future.wait(doctorFutures);
+
+    return doctors;
   }
 }
