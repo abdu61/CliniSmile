@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum ConsultationMode { online, offline }
+
 class DoctorPackage {
   final String id;
   final String doctorId;
@@ -7,7 +9,7 @@ class DoctorPackage {
   final String description;
   final int duration;
   final double price;
-  final String consultationMode;
+  final ConsultationMode consultationMode;
 
   DoctorPackage({
     required this.id,
@@ -28,7 +30,9 @@ class DoctorPackage {
       description: data['description'],
       duration: data['duration'],
       price: data['price'],
-      consultationMode: data['consultationMode'],
+      consultationMode: data['consultationMode'] == 'online'
+          ? ConsultationMode.online
+          : ConsultationMode.offline,
     );
   }
 }

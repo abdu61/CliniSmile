@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/models/doctor.dart';
+import 'package:dental_clinic/models/feed.dart';
 
 class DatabaseService {
   final String uid;
@@ -13,6 +14,8 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('categories');
   final CollectionReference _doctorsCollection =
       FirebaseFirestore.instance.collection('doctors');
+  final CollectionReference _feedItemsCollection =
+      FirebaseFirestore.instance.collection('feedItems');
 
   Future<void> updateUserData(
       String name, String email, String phone, String role) async {
@@ -155,5 +158,66 @@ class DatabaseService {
     }).toList();
 
     return await Future.wait(doctorFutures);
+  }
+
+  // Feed Items
+  // Method to create a new feed item
+  Future<void> createFeedItem(FeedItem feedItem) {
+    return _feedItemsCollection.add({
+      'imageUrl': feedItem.imageUrl,
+      'title': feedItem.title,
+      'type': feedItem.type,
+      'category': feedItem.category,
+      if (feedItem.type == 'blog') 'content': feedItem.content,
+    });
+  }
+
+  // Method to fetch all feed items
+  Future<List<FeedItem>> getFeedItems() async {
+    final snapshot = await _feedItemsCollection.get();
+
+    return snapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return FeedItem(
+        imageUrl: data['imageUrl'] ?? '',
+        title: data['title'] ?? '',
+        content: data['content'] ?? '',
+        type: data['type'] ?? '',
+        category: data['category'] ?? '',
+      );
+    }).toList();
+  }
+
+// Method to fetch feed items by category
+  Future<List<FeedItem>> getFeedItemsByCategory(String category) async {
+    final snapshot =
+        await _feedItemsCollection.where('category', isEqualTo: category).get();
+
+    return snapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return FeedItem(
+        imageUrl: data['imageUrl'] ?? '',
+        title: data['title'] ?? '',
+        content: data['content'] ?? '',
+        type: data['type'] ?? '',
+        category: data['category'] ?? '',
+      );
+    }).toList();
+  }
+
+// Method to update a feed item
+  Future<void> updateFeedItem(String id, FeedItem feedItem) {
+    return _feedItemsCollection.doc(id).update({
+      'imageUrl': feedItem.imageUrl,
+      'title': feedItem.title,
+      'type': feedItem.type,
+      'category': feedItem.category,
+      if (feedItem.type == 'blog') 'content': feedItem.content,
+    });
+  }
+
+// Method to delete a feed item
+  Future<void> deleteFeedItem(String id) {
+    return _feedItemsCollection.doc(id).delete();
   }
 }

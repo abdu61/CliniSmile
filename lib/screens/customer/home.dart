@@ -5,7 +5,7 @@ import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
 import 'package:dental_clinic/shared/widgets/Lists/doctor_list_tile.dart';
-import 'package:dental_clinic/shared/widgets/cards/AppointmentPreviewCard.dart';
+import 'package:dental_clinic/shared/widgets/cards/appointment_preview_card.dart';
 import 'package:dental_clinic/shared/widgets/category_circle.dart';
 import 'package:dental_clinic/screens/dynamic_pages/category_page.dart';
 import 'package:dental_clinic/shared/widgets/section_title.dart';

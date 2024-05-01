@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class DoctorWorkingHours {
   final String id;
   final String doctorId;
-  final DateTime startTime;
-  final DateTime endTime;
+  final String startTime;
+  final String endTime;
   final String dayOfWeek;
 
   DoctorWorkingHours({
@@ -20,8 +20,8 @@ class DoctorWorkingHours {
     return DoctorWorkingHours(
       id: doc.id,
       doctorId: data['doctorId'],
-      startTime: (data['startTime'] as Timestamp).toDate(),
-      endTime: (data['endTime'] as Timestamp).toDate(),
+      startTime: data['startTime'],
+      endTime: data['endTime'],
       dayOfWeek: data['dayOfWeek'],
     );
   }
