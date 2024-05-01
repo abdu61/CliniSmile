@@ -24,7 +24,7 @@ class AppointmentPreviewCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color.fromARGB(255, 136, 164, 255),
+                Color.fromARGB(255, 126, 156, 252),
                 Color.fromARGB(255, 168, 188, 255),
               ],
             ),

@@ -1,4 +1,5 @@
 import 'package:dental_clinic/models/doctor.dart';
+import 'package:dental_clinic/screens/dynamic_pages/doctor_details.dart';
 import 'package:flutter/material.dart';
 
 class DoctorListTile extends StatelessWidget {
@@ -15,7 +16,14 @@ class DoctorListTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
         // Add navigation
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DoctorDetailsPage(doctor: doctor),
+            ),
+          );
+        },
         contentPadding: EdgeInsets.zero,
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
@@ -68,10 +76,17 @@ class DoctorListTile extends StatelessWidget {
           ],
         ),
         trailing: FilledButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DoctorDetailsPage(doctor: doctor),
+              ),
+            );
+          },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(
-              const Color.fromARGB(255, 136, 164, 255),
+              const Color.fromARGB(255, 126, 156, 252),
             ),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(

@@ -38,6 +38,17 @@ class MyApp extends StatelessWidget {
         title: 'CliniSmile',
         theme: ThemeData(
           primaryColor: const Color(0xFF254EDB),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(
+                  255, 126, 156, 252), // Set the background color here
+              padding: const EdgeInsets.all(5.0), // Add more padding here
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(8.0), // Set the border radius here
+              ),
+            ),
+          ),
         ),
         home: Wrapper(),
       ),

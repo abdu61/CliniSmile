@@ -7,7 +7,7 @@ import 'package:dental_clinic/shared/loading.dart';
 import 'package:dental_clinic/shared/widgets/Lists/doctor_list_tile.dart';
 import 'package:dental_clinic/shared/widgets/cards/AppointmentPreviewCard.dart';
 import 'package:dental_clinic/shared/widgets/category_circle.dart';
-import 'package:dental_clinic/shared/widgets/pages/category_page.dart';
+import 'package:dental_clinic/screens/dynamic_pages/category_page.dart';
 import 'package:dental_clinic/shared/widgets/section_title.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +29,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     userName = getUserName();
-    printAllDoctors();
   }
 
   Future<String> getUserName() async {
@@ -37,15 +36,6 @@ class _HomeState extends State<Home> {
     final DatabaseService db = DatabaseService(uid: user?.uid ?? '');
     final DocumentSnapshot docSnapshot = await db.getUserData();
     return (docSnapshot.data() as Map<String, dynamic>)['name'] ?? 'User';
-  }
-
-// debugging function to print all doctors
-  void printAllDoctors() async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    QuerySnapshot querySnapshot = await firestore.collection('doctors').get();
-    for (var doc in querySnapshot.docs) {
-      print(doc.data());
-    }
   }
 
   @override
@@ -84,7 +74,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 70,
       title: _buildTitle(context),
       actions: _buildActions(context),
-      bottom: _buildBottom(),
+      bottom: buildBottom(),
     );
   }
 
@@ -164,17 +154,17 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   // Search field
-  PreferredSize _buildBottom() {
+  PreferredSize buildBottom() {
     return PreferredSize(
       preferredSize: const Size.fromHeight(60.0),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-        child: _buildSearchField(),
+        child: buildSearchField(),
       ),
     );
   }
 
-  TextFormField _buildSearchField() {
+  TextFormField buildSearchField() {
     return TextFormField(
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.all(2.0),
@@ -202,7 +192,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
             borderRadius: BorderRadius.circular(4.0),
           ),
           child: const Icon(
-            Icons.filter_alt_outlined,
+            Icons.filter_list_outlined,
             color: Colors.black,
           ),
         ),

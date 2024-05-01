@@ -20,7 +20,7 @@ class CategoryCircle extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: const Color.fromRGBO(191, 206, 255, 1),
+            backgroundColor: const Color.fromARGB(255, 220, 227, 255),
             foregroundColor: Colors.black,
             child: Icon(icon),
           ),
