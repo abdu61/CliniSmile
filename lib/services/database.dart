@@ -131,4 +131,29 @@ class DatabaseService {
 
     return doctors;
   }
+
+  // For displaying based on category
+  Future<List<Doctor>> getDoctorsByCategory(String categoryId) async {
+    final snapshot =
+        await _doctorsCollection.where('category', isEqualTo: categoryId).get();
+
+    List<Future<Doctor>> doctorFutures = snapshot.docs.map((doc) async {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      Category category = await getCategoryById(data['category']);
+
+      return Doctor(
+        id: doc.id,
+        name: data['name'] ?? '',
+        bio: data['bio'] ?? '',
+        profileImageUrl: data['profileImageUrl'] ?? '',
+        category: category,
+        rating: data['rating'] ?? 0.0,
+        reviewCount: data['reviewCount'] ?? 0,
+        experience: data['experience'] ?? 0,
+      );
+    }).toList();
+
+    return await Future.wait(doctorFutures);
+  }
 }

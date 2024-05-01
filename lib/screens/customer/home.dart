@@ -7,6 +7,7 @@ import 'package:dental_clinic/shared/loading.dart';
 import 'package:dental_clinic/shared/widgets/Lists/doctor_list_tile.dart';
 import 'package:dental_clinic/shared/widgets/cards/AppointmentPreviewCard.dart';
 import 'package:dental_clinic/shared/widgets/category_circle.dart';
+import 'package:dental_clinic/shared/widgets/pages/category_page.dart';
 import 'package:dental_clinic/shared/widgets/section_title.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -266,6 +267,17 @@ class _DoctorCategory extends StatelessWidget {
                     child: CategoryCircle(
                       icon: iconData,
                       label: category.name,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CategoryPage(
+                              categoryName: category.name,
+                              categoryId: category.id,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   );
                 }).toList(),
