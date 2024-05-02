@@ -6,9 +6,11 @@ class DoctorListTile extends StatelessWidget {
   const DoctorListTile({
     super.key,
     required this.doctor,
+    required this.userId,
   });
 
   final Doctor doctor;
+  final String userId;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,8 @@ class DoctorListTile extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DoctorDetailsPage(doctor: doctor),
+              builder: (context) =>
+                  DoctorDetailsPage(doctor: doctor, userId: userId),
             ),
           );
         },
@@ -80,7 +83,8 @@ class DoctorListTile extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DoctorDetailsPage(doctor: doctor),
+                builder: (context) =>
+                    DoctorDetailsPage(doctor: doctor, userId: userId),
               ),
             );
           },

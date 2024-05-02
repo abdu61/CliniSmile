@@ -8,7 +8,7 @@ class AdminNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(NavigationController());
+    final controller = Get.put(AdminNavigationController());
     return Scaffold(
       bottomNavigationBar: Obx(
         () => NavigationBar(
@@ -36,7 +36,7 @@ class AdminNav extends StatelessWidget {
   }
 }
 
-class NavigationController extends GetxController {
+class AdminNavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
   final screens = [

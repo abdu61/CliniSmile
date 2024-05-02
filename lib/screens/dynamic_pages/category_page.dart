@@ -41,7 +41,8 @@ class CategoryPage extends StatelessWidget {
               child: ListView.builder(
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
-                  return DoctorListTile(doctor: snapshot.data![index]);
+                  return DoctorListTile(
+                      doctor: snapshot.data![index], userId: 'your_uid_here');
                 },
               ),
             );

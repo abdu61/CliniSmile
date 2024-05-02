@@ -11,7 +11,7 @@ class CustomerNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(NavigationController());
+    final controller = Get.put(CustomerNavigationController());
     return Scaffold(
       bottomNavigationBar: Obx(
         () => NavigationBar(
@@ -51,7 +51,7 @@ class CustomerNav extends StatelessWidget {
   }
 }
 
-class NavigationController extends GetxController {
+class CustomerNavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
   final screens = [

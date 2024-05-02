@@ -14,13 +14,13 @@ class _AppointmentState extends State<Appointment> {
       appBar: AppBar(
         title: const DefaultTextStyle(
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 25.0,
           ),
           child: Text('Appointment'),
         ),
-        backgroundColor: Color(0xFF254EDB),
+        backgroundColor: const Color.fromARGB(255, 220, 227, 255),
         elevation: 0.0,
       ),
       body: const Center(

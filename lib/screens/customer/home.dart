@@ -24,11 +24,13 @@ class _HomeState extends State<Home> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   bool loading = false;
   late Future<String> userName;
+  String? userId;
 
   @override
   void initState() {
     super.initState();
     userName = getUserName();
+    userId = _firebaseAuth.currentUser?.uid;
   }
 
   Future<String> getUserName() async {
@@ -53,7 +55,7 @@ class _HomeState extends State<Home> {
                     const SizedBox(height: 10),
                     _DoctorCategory(),
                     const SizedBox(height: 10),
-                    _Doctors(),
+                    _Doctors(userId: userId),
                   ],
                 ),
               ),
@@ -282,7 +284,9 @@ class _DoctorCategory extends StatelessWidget {
 
 // Top Doctors
 class _Doctors extends StatelessWidget {
-  const _Doctors({Key? key}) : super(key: key);
+  final String? userId;
+
+  const _Doctors({Key? key, this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +313,8 @@ class _Doctors extends StatelessWidget {
                 shrinkWrap: true,
                 itemCount: snapshot.hasData ? snapshot.data!.length : 0,
                 itemBuilder: (context, index) {
-                  return DoctorListTile(doctor: snapshot.data![index]);
+                  return DoctorListTile(
+                      doctor: snapshot.data![index], userId: userId ?? '');
                 },
               ),
             ],

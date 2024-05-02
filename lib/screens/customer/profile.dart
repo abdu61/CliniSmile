@@ -17,13 +17,13 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         title: const DefaultTextStyle(
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 25.0,
           ),
           child: Text('Profile'),
         ),
-        backgroundColor: const Color(0xFF254EDB),
+        backgroundColor: const Color.fromARGB(255, 220, 227, 255),
         elevation: 0.0,
         //sign out button
         actions: <Widget>[
@@ -38,13 +38,13 @@ class _ProfileState extends State<Profile> {
             },
             icon: const Icon(
               Icons.person,
-              color: Colors.white,
+              color: Colors.black,
             ),
             label: const Text(
               'logout',
               style: TextStyle(
                 fontSize: 16.0,
-                color: Colors.white,
+                color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
             ),

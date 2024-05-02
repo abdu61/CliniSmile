@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/models/feed.dart';
+import 'package:dental_clinic/models/appointment.dart';
+import 'package:flutter/material.dart';
 
 class DatabaseService {
   final String uid;
@@ -16,6 +18,8 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('doctors');
   final CollectionReference _feedItemsCollection =
       FirebaseFirestore.instance.collection('feedItems');
+  final CollectionReference _appointmentsCollection =
+      FirebaseFirestore.instance.collection('appointments');
 
   Future<void> updateUserData(
       String name, String email, String phone, String role) async {
@@ -75,6 +79,11 @@ class DatabaseService {
 
   // Doctors
   Future<void> addDoctor(Doctor doctor) {
+    Map<String, String> workingHours = {};
+    doctor.workingHours.forEach((key, value) {
+      workingHours[key] = value.join('+'); // Convert List<String> to String
+    });
+
     return _doctorsCollection.add({
       'name': doctor.name,
       'bio': doctor.bio,
@@ -83,6 +92,7 @@ class DatabaseService {
       'rating': doctor.rating,
       'reviewCount': doctor.reviewCount,
       'experience': doctor.experience,
+      'workingHours': workingHours, // New field
     });
   }
 
@@ -90,60 +100,16 @@ class DatabaseService {
     final snapshot = await _doctorsCollection.get();
 
     List<Future<Doctor>> doctorFutures = snapshot.docs.map((doc) async {
-      try {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-        if (!data.containsKey('name')) {
-          throw Exception('Document ${doc.id} does not contain a "name" field');
-        }
-
-        Category category;
-        try {
-          category = await getCategoryById(data['category']);
-        } catch (error) {
-          category = Category(id: '0', name: 'No category', icon: '');
-        }
-
-        Doctor doctor = Doctor(
-          id: doc.id,
-          name: data['name'] ?? '',
-          bio: data['bio'] ?? '',
-          profileImageUrl: data['profileImageUrl'] ?? '',
-          category: category,
-          rating: data['rating'] ?? 0.0,
-          reviewCount: data['reviewCount'] ?? 0,
-          experience: data['experience'] ?? 0,
-        );
-
-        return doctor;
-      } catch (error) {
-        return Doctor(
-          id: '',
-          name: 'Error',
-          bio: '',
-          profileImageUrl: '',
-          category: Category(id: '', name: 'error', icon: ''),
-          rating: 0.0,
-          reviewCount: 0,
-          experience: 0,
-        );
-      }
-    }).toList();
-
-    List<Doctor> doctors = await Future.wait(doctorFutures);
-
-    return doctors;
-  }
-
-  // For displaying based on category
-  Future<List<Doctor>> getDoctorsByCategory(String categoryId) async {
-    final snapshot =
-        await _doctorsCollection.where('category', isEqualTo: categoryId).get();
-
-    List<Future<Doctor>> doctorFutures = snapshot.docs.map((doc) async {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
       Category category = await getCategoryById(data['category']);
+
+      Map<String, List<String>> workingHours = {};
+      Map<String, dynamic>.from(data['workingHours'] ?? {})
+          .forEach((key, value) {
+        workingHours[key] =
+            value.split('+'); // Convert String back to List<String>
+      });
 
       return Doctor(
         id: doc.id,
@@ -154,6 +120,40 @@ class DatabaseService {
         rating: data['rating'] ?? 0.0,
         reviewCount: data['reviewCount'] ?? 0,
         experience: data['experience'] ?? 0,
+        workingHours: workingHours, // New field
+      );
+    }).toList();
+
+    return await Future.wait(doctorFutures);
+  }
+
+// For displaying based on category
+  Future<List<Doctor>> getDoctorsByCategory(String categoryId) async {
+    final snapshot =
+        await _doctorsCollection.where('category', isEqualTo: categoryId).get();
+
+    List<Future<Doctor>> doctorFutures = snapshot.docs.map((doc) async {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      Category category = await getCategoryById(data['category']);
+
+      Map<String, List<String>> workingHours = {};
+      Map<String, dynamic>.from(data['workingHours'] ?? {})
+          .forEach((key, value) {
+        workingHours[key] =
+            value.split('+'); // Convert String back to List<String>
+      });
+
+      return Doctor(
+        id: doc.id,
+        name: data['name'] ?? '',
+        bio: data['bio'] ?? '',
+        profileImageUrl: data['profileImageUrl'] ?? '',
+        category: category,
+        rating: data['rating'] ?? 0.0,
+        reviewCount: data['reviewCount'] ?? 0,
+        experience: data['experience'] ?? 0,
+        workingHours: workingHours, // New field
       );
     }).toList();
 
@@ -219,5 +219,54 @@ class DatabaseService {
 // Method to delete a feed item
   Future<void> deleteFeedItem(String id) {
     return _feedItemsCollection.doc(id).delete();
+  }
+
+  //Appointment
+  Future<void> addAppointment(Appointment appointment, String formattedTime) {
+    return _appointmentsCollection.add({
+      'doctorId': appointment.doctorId,
+      'userId': appointment.userId,
+      'date': appointment.date,
+      'time': formattedTime,
+      'status': appointment.status,
+      'paymentMethod': appointment.paymentMethod, // New field
+    });
+  }
+
+  Future<List<Appointment>> getAppointmentsByUser(String userId) async {
+    final snapshot =
+        await _appointmentsCollection.where('userId', isEqualTo: userId).get();
+
+    return snapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      return Appointment(
+        id: doc.id,
+        doctorId: data['doctorId'] ?? '',
+        userId: data['userId'] ?? '',
+        date: (data['date'] as Timestamp)
+            .toDate(), // Convert Timestamp to DateTime
+        time: TimeOfDay.fromDateTime(DateTime.parse(
+            '2022-01-01 ${data['time']}')), // Convert String to TimeOfDay
+        status: data['status'] ?? 'pending',
+        paymentMethod: data['paymentMethod'] ?? '', // New field
+      );
+    }).toList();
+  }
+
+  Future<void> updateAppointment(
+      Appointment appointment, String formattedTime) {
+    return _appointmentsCollection.doc(appointment.id).update({
+      'doctorId': appointment.doctorId,
+      'userId': appointment.userId,
+      'date': appointment.date,
+      'time': formattedTime,
+      'status': appointment.status,
+      'paymentMethod': appointment.paymentMethod, // New field
+    });
+  }
+
+  Future<void> deleteAppointment(String id) {
+    return _appointmentsCollection.doc(id).delete();
   }
 }

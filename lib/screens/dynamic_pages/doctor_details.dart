@@ -5,8 +5,9 @@ import 'package:dental_clinic/models/doctor.dart';
 
 class DoctorDetailsPage extends StatelessWidget {
   final Doctor? doctor;
+  final String? userId;
 
-  DoctorDetailsPage({this.doctor});
+  DoctorDetailsPage({this.doctor, this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class DoctorDetailsPage extends StatelessWidget {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation1, animation2) =>
-                        BookAppointmentPage(doctor: doctor),
+                        BookAppointmentPage(doctor: doctor, userId: userId),
                     transitionDuration: Duration(microseconds: 200000),
                     transitionsBuilder:
                         (context, animation, animationTime, child) {
