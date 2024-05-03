@@ -23,7 +23,7 @@ class _GuestHomeState extends State<GuestHome> {
           ),
           child: Text('Guest Home'),
         ),
-        backgroundColor: Color(0xFF254EDB),
+        backgroundColor: const Color(0xFF254EDB),
         elevation: 0.0,
         actions: <Widget>[
           TextButton.icon(
@@ -54,6 +54,5 @@ class _GuestHomeState extends State<GuestHome> {
         child: Text('Welcome Staff'),
       ),
     );
-    ;
   }
 }

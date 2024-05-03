@@ -80,8 +80,14 @@ class DatabaseService {
   // Doctors
   Future<void> addDoctor(Doctor doctor) {
     Map<String, String> workingHours = {};
+    Map<String, String> breakHours = {};
+
     doctor.workingHours.forEach((key, value) {
       workingHours[key] = value.join('+'); // Convert List<String> to String
+    });
+
+    doctor.breakHours.forEach((key, value) {
+      breakHours[key] = value.join('+'); // Convert List<String> to String
     });
 
     return _doctorsCollection.add({
@@ -92,7 +98,8 @@ class DatabaseService {
       'rating': doctor.rating,
       'reviewCount': doctor.reviewCount,
       'experience': doctor.experience,
-      'workingHours': workingHours, // New field
+      'workingHours': workingHours, // Existing field
+      'breakHours': breakHours, // New field
     });
   }
 
@@ -111,6 +118,12 @@ class DatabaseService {
             value.split('+'); // Convert String back to List<String>
       });
 
+      Map<String, List<String>> breakHours = {};
+      Map<String, dynamic>.from(data['breakHours'] ?? {}).forEach((key, value) {
+        breakHours[key] =
+            value.split('+'); // Convert String back to List<String>
+      });
+
       return Doctor(
         id: doc.id,
         name: data['name'] ?? '',
@@ -120,7 +133,8 @@ class DatabaseService {
         rating: data['rating'] ?? 0.0,
         reviewCount: data['reviewCount'] ?? 0,
         experience: data['experience'] ?? 0,
-        workingHours: workingHours, // New field
+        workingHours: workingHours,
+        breakHours: breakHours, // New field
       );
     }).toList();
 
@@ -144,6 +158,12 @@ class DatabaseService {
             value.split('+'); // Convert String back to List<String>
       });
 
+      Map<String, List<String>> breakHours = {};
+      Map<String, dynamic>.from(data['breakHours'] ?? {}).forEach((key, value) {
+        breakHours[key] =
+            value.split('+'); // Convert String back to List<String>
+      });
+
       return Doctor(
         id: doc.id,
         name: data['name'] ?? '',
@@ -153,11 +173,48 @@ class DatabaseService {
         rating: data['rating'] ?? 0.0,
         reviewCount: data['reviewCount'] ?? 0,
         experience: data['experience'] ?? 0,
-        workingHours: workingHours, // New field
+        workingHours: workingHours,
+        breakHours: breakHours, // New field
       );
     }).toList();
 
     return await Future.wait(doctorFutures);
+  }
+
+  Future<Doctor> getDoctorById(String doctorId) async {
+    final doc = await _doctorsCollection.doc(doctorId).get();
+
+    if (!doc.exists) {
+      throw Exception('Doctor not found');
+    }
+
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+    Category category = await getCategoryById(data['category']);
+
+    Map<String, List<String>> workingHours = {};
+    Map<String, dynamic>.from(data['workingHours'] ?? {}).forEach((key, value) {
+      workingHours[key] =
+          value.split('+'); // Convert String back to List<String>
+    });
+
+    Map<String, List<String>> breakHours = {};
+    Map<String, dynamic>.from(data['breakHours'] ?? {}).forEach((key, value) {
+      breakHours[key] = value.split('+'); // Convert String back to List<String>
+    });
+
+    return Doctor(
+      id: doc.id,
+      name: data['name'] ?? '',
+      bio: data['bio'] ?? '',
+      profileImageUrl: data['profileImageUrl'] ?? '',
+      category: category,
+      rating: data['rating'] ?? 0.0,
+      reviewCount: data['reviewCount'] ?? 0,
+      experience: data['experience'] ?? 0,
+      workingHours: workingHours,
+      breakHours: breakHours, // New field
+    );
   }
 
   // Feed Items
@@ -222,12 +279,12 @@ class DatabaseService {
   }
 
   //Appointment
-  Future<void> addAppointment(Appointment appointment, String formattedTime) {
+  Future<void> addAppointment(Appointment appointment) {
     return _appointmentsCollection.add({
       'doctorId': appointment.doctorId,
       'userId': appointment.userId,
-      'date': appointment.date,
-      'time': formattedTime,
+      'start': appointment.start,
+      'end': appointment.end,
       'status': appointment.status,
       'paymentMethod': appointment.paymentMethod,
       'bookingTime': appointment.bookingTime,
@@ -246,29 +303,25 @@ class DatabaseService {
         id: doc.id,
         doctorId: data['doctorId'] ?? '',
         userId: data['userId'] ?? '',
-        date: (data['date'] as Timestamp)
-            .toDate(), // Convert Timestamp to DateTime
-        time: TimeOfDay.fromDateTime(DateTime.parse(
-            '2022-01-01 ${data['time']}')), // Convert String to TimeOfDay
+        start: (data['start'] as Timestamp).toDate(),
+        end: (data['end'] as Timestamp).toDate(),
         status: data['status'] ?? 'pending',
         paymentMethod: data['paymentMethod'] ?? '',
-        bookingTime: (data['bookingTime'] as Timestamp)
-            .toDate(), // Convert Timestamp to DateTime
+        bookingTime: (data['bookingTime'] as Timestamp).toDate(),
         billedAmount: data['billedAmount'] ?? '0.0',
       );
     }).toList();
   }
 
-  Future<void> updateAppointment(
-      Appointment appointment, String formattedTime) {
+  Future<void> updateAppointment(Appointment appointment) {
     return _appointmentsCollection.doc(appointment.id).update({
       'doctorId': appointment.doctorId,
       'userId': appointment.userId,
-      'date': appointment.date,
-      'time': formattedTime,
+      'start': appointment.start,
+      'end': appointment.end,
       'status': appointment.status,
       'paymentMethod': appointment.paymentMethod,
-      'bookingTime': appointment.bookingTime, // Update bookingTime
+      'bookingTime': appointment.bookingTime,
     });
   }
 
@@ -278,49 +331,36 @@ class DatabaseService {
     final endOfDay =
         startOfDay.add(Duration(days: 1)).subtract(Duration(seconds: 1));
 
-    print('Fetching appointments for doctorId: $doctorId, date: $date');
-
     final snapshot = await _appointmentsCollection
         .where('doctorId', isEqualTo: doctorId)
         .where('start', isGreaterThanOrEqualTo: startOfDay)
         .where('start', isLessThanOrEqualTo: endOfDay)
         .get();
 
-    print('Fetched ${snapshot.docs.length} appointments');
+    return snapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    return snapshot.docs
-        .map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-          print('Processing appointment with id: ${doc.id}');
-
-          if (data['start'] == null) {
-            print('Skipping appointment with id: ${doc.id} due to null start');
-            return null;
-          }
-
-          DateTime start = (data['start'] as Timestamp).toDate().toUtc();
-          TimeOfDay time = TimeOfDay.fromDateTime(start);
-
-          print('Creating appointment with id: ${doc.id}');
-          return Appointment(
-            id: doc.id,
-            doctorId: data['doctorId'] ?? '',
-            userId: data['userId'] ?? '',
-            date: start,
-            time: time,
-            status: data['status'] ?? 'pending',
-            paymentMethod: data['paymentMethod'] ?? '',
-            bookingTime: (data['bookingTime'] as Timestamp)
-                .toDate(), // Convert Timestamp to DateTime
-          );
-        })
-        .where((appointment) => appointment != null)
-        .toList()
-        .cast<Appointment>();
+      return Appointment(
+        id: doc.id,
+        doctorId: data['doctorId'] ?? '',
+        userId: data['userId'] ?? '',
+        start: (data['start'] as Timestamp).toDate(),
+        end: (data['end'] as Timestamp).toDate(),
+        status: data['status'] ?? 'pending',
+        paymentMethod: data['paymentMethod'] ?? '',
+        bookingTime: (data['bookingTime'] as Timestamp).toDate(),
+        billedAmount: data['billedAmount'] ?? '0.0',
+      );
+    }).toList();
   }
 
   Future<void> deleteAppointment(String id) {
     return _appointmentsCollection.doc(id).delete();
+  }
+
+  Stream<QuerySnapshot> getAppointmentsByUserid(String userId) {
+    return _appointmentsCollection
+        .where('userId', isEqualTo: userId)
+        .snapshots();
   }
 }

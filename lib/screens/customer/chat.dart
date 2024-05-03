@@ -29,7 +29,7 @@ class _ChatState extends State<Chat> {
         children: <Widget>[
           Flexible(
             child: ListView.builder(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               reverse: true,
               itemCount: _messages.length,
               itemBuilder: (_, int index) {
@@ -37,14 +37,14 @@ class _ChatState extends State<Chat> {
                 final bool isUserMessage = message.from == 'user';
 
                 return Container(
-                  margin: EdgeInsets.symmetric(vertical: 10.0),
+                  margin: const EdgeInsets.symmetric(vertical: 10.0),
                   child: Row(
                     mainAxisAlignment: isUserMessage
                         ? MainAxisAlignment.end
                         : MainAxisAlignment.start,
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                             horizontal: 20.0, vertical: 10.0),
                         decoration: BoxDecoration(
                           color: isUserMessage
@@ -61,7 +61,7 @@ class _ChatState extends State<Chat> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(left: 12.0, right: 12.0, bottom: 8.0),
+            margin: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 8.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               color: Colors.grey[200],
@@ -70,10 +70,10 @@ class _ChatState extends State<Chat> {
               children: <Widget>[
                 Flexible(
                   child: Padding(
-                    padding: EdgeInsets.only(left: 16.0),
+                    padding: const EdgeInsets.only(left: 16.0),
                     child: TextField(
                       controller: _controller,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: "Type a message",
                       ),
@@ -82,9 +82,9 @@ class _ChatState extends State<Chat> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 4.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: IconButton(
-                    icon: Icon(Icons.send),
+                    icon: const Icon(Icons.send),
                     onPressed: () => _handleSubmitted(_controller.text),
                   ),
                 ),

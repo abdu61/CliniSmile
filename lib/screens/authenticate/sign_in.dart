@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/shared/constant.dart';
 import 'package:dental_clinic/shared/loading.dart';
@@ -6,7 +8,8 @@ import 'package:flutter/material.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
-  SignIn({Key? key, required this.toggleView}) : super(key: key);
+  // ignore: prefer_const_constructors_in_immutables
+  SignIn({super.key, required this.toggleView});
 
   @override
   State<SignIn> createState() => _SignInState();
@@ -78,7 +81,7 @@ class _SignInState extends State<SignIn> {
                                 validator: (val) {
                                   Pattern pattern =
                                       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                                  RegExp regex = new RegExp(pattern.toString());
+                                  RegExp regex = RegExp(pattern.toString());
                                   if (!regex.hasMatch(val!)) {
                                     return 'Enter a valid email';
                                   } else {
@@ -105,7 +108,8 @@ class _SignInState extends State<SignIn> {
                                       showPassword
                                           ? Icons.visibility
                                           : Icons.visibility_off,
-                                      color: Theme.of(context).primaryColorDark,
+                                      color: const Color.fromARGB(
+                                          255, 126, 156, 252),
                                     ),
                                     onPressed: () {
                                       // Update the state i.e. toogle the state of passwordVisible variable
@@ -120,7 +124,11 @@ class _SignInState extends State<SignIn> {
 
                               //Sign In Button
                               ElevatedButton(
-                                style: buttonAuthenticateStyle,
+                                style: buttonAuthenticateStyle.copyWith(
+                                  backgroundColor: MaterialStateProperty.all(
+                                    const Color.fromARGB(255, 126, 156, 252),
+                                  ),
+                                ),
                                 onPressed: () async {
                                   if (_formKey.currentState!.validate()) {
                                     setState(() => loading = true);
@@ -141,7 +149,11 @@ class _SignInState extends State<SignIn> {
                                 },
                                 child: const Text(
                                   'Sign in',
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 6.0),
@@ -161,7 +173,11 @@ class _SignInState extends State<SignIn> {
                                 ),
                                 child: const Text(
                                   'Guest',
-                                  style: TextStyle(color: Color(0xFF254EDB)),
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 77, 119, 255),
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 onPressed: () async {
                                   setState(() => loading = true);
@@ -198,7 +214,7 @@ class _SignInState extends State<SignIn> {
                             TextSpan(
                               text: 'Sign Up Now',
                               style: const TextStyle(
-                                color: Color(0xFF254EDB),
+                                color: Color.fromARGB(255, 77, 119, 255),
                                 fontSize: 14.0,
                               ),
                               recognizer: TapGestureRecognizer()

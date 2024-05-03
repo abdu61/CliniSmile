@@ -20,7 +20,7 @@ class _StaffAppointmentState extends State<StaffAppointment> {
           ),
           child: Text('Appointment'),
         ),
-        backgroundColor: Color(0xFF254EDB),
+        backgroundColor: const Color(0xFF254EDB),
         elevation: 0.0,
       ),
       body: const Center(

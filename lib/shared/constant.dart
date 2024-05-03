@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Search bar decoration
 const textInputDecoration = InputDecoration(
   contentPadding: EdgeInsets.all(15.0),
   fillColor: Colors.white,

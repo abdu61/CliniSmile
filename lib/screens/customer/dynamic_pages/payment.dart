@@ -1,3 +1,4 @@
+import 'package:dental_clinic/shared/widgets/core.dart/bottom_navbar_button.dart';
 import 'package:flutter/material.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -45,9 +46,10 @@ class _PaymentPageState extends State<PaymentPage> {
           'userId': widget.userId,
           'start': start,
           'end': end,
+          'status': 'Pending',
           'paymentMethod': _paymentMethod,
           'bookingTime': DateTime.now(),
-          'billedAmount': '100.0',
+          'billedAmount': '5.0',
         });
 
         // Show a dialog that says "Appointment successful"
@@ -56,10 +58,11 @@ class _PaymentPageState extends State<PaymentPage> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Appointment successful'),
-              content: Text('Your appointment has been booked successfully.'),
+              content:
+                  const Text('Your appointment has been booked successfully.'),
               actions: <Widget>[
                 TextButton(
-                  child: Text('OK'),
+                  child: const Text('OK'),
                   onPressed: () {
                     if (Navigator.of(context).canPop()) {
                       Navigator.of(context).pop(); // Pop the dialog
@@ -83,11 +86,11 @@ class _PaymentPageState extends State<PaymentPage> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Slot already booked'),
-              content: Text('Please select a different slot.'),
+              title: const Text('Slot already booked'),
+              content: const Text('Please select a different slot.'),
               actions: <Widget>[
                 TextButton(
-                  child: Text('OK'),
+                  child: const Text('OK'),
                   onPressed: () {
                     // Pop the dialog
                     Navigator.of(context).pop();
@@ -141,28 +144,17 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
               const SizedBox(height: 16.0),
               Text(
-                'Billed Amount: \$100.0',
+                'Consultation Fee: BD 5.0',
                 style: textTheme.titleMedium,
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: const Color.fromARGB(255, 220, 227, 255),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: ElevatedButton(
-            onPressed: _pay,
-            child: Text(
-              'Pay',
-              style: textTheme.labelLarge!.copyWith(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
+      bottomNavigationBar: BottomNavBarButtons(
+        isEnabled: true,
+        onPressed: _pay,
+        buttonText: 'Pay',
       ),
     );
   }

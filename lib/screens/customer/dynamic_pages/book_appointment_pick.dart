@@ -1,7 +1,10 @@
 import 'package:dental_clinic/models/doctor.dart';
-import 'package:dental_clinic/screens/dynamic_pages/payment.dart';
+import 'package:dental_clinic/screens/customer/dynamic_pages/payment.dart';
 import 'package:dental_clinic/services/database.dart';
+import 'package:dental_clinic/shared/widgets/DateTime%20pickers/date_selector.dart';
+import 'package:dental_clinic/shared/widgets/DateTime%20pickers/time_selector.dart';
 import 'package:dental_clinic/shared/widgets/cards/doctor_card.dart';
+import 'package:dental_clinic/shared/widgets/core.dart/bottom_navbar_button.dart';
 import 'package:flutter/material.dart';
 
 class BookAppointmentPage extends StatefulWidget {
@@ -44,33 +47,22 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     }
   }
 
-  String _weekdayToAbbreviatedString(int weekday) {
-    switch (weekday) {
-      case 1:
-        return 'Mon';
-      case 2:
-        return 'Tue';
-      case 3:
-        return 'Wed';
-      case 4:
-        return 'Thu';
-      case 5:
-        return 'Fri';
-      case 6:
-        return 'Sat';
-      case 7:
-        return 'Sun';
-      default:
-        throw Exception('Invalid weekday: $weekday');
+  TimeOfDay _parseTime(String time) {
+    final split = time.split(':');
+    if (split.length != 2) {
+      throw FormatException(
+          'Invalid time format. Expected "HH:mm", got "$time"');
+    }
+    try {
+      return TimeOfDay(hour: int.parse(split[0]), minute: int.parse(split[1]));
+    } catch (e) {
+      throw FormatException(
+          'Invalid time format. Expected "HH:mm", got "$time"');
     }
   }
 
-  TimeOfDay _parseTime(String time) {
-    final split = time.split(':');
-    return TimeOfDay(hour: int.parse(split[0]), minute: int.parse(split[1]));
-  }
-
-  List<TimeOfDay> _generateTimeSlots(List<String>? workingHours) {
+  List<TimeOfDay> _generateTimeSlots(
+      List<String>? workingHours, List<String>? breakHours) {
     if (workingHours == null || workingHours.isEmpty) {
       return <TimeOfDay>[]; // Return an empty list if the doctor is not available
     }
@@ -88,7 +80,26 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
     final timeSlots = <TimeOfDay>[];
 
+    TimeOfDay? breakStartTime;
+    TimeOfDay? breakEndTime;
+    int? breakStartMinutes;
+    int? breakEndMinutes;
+
+    if (breakHours != null && breakHours.length == 2) {
+      breakStartTime = _parseTime(breakHours[0]);
+      breakEndTime = _parseTime(breakHours[1]);
+
+      breakStartMinutes = breakStartTime.hour * 60 + breakStartTime.minute;
+      breakEndMinutes = breakEndTime.hour * 60 + breakEndTime.minute;
+    }
+
     for (var i = startMinutes; i < endMinutes; i += 30) {
+      // Skip the time slot if it falls within the break hours
+      if (breakStartMinutes != null &&
+          breakEndMinutes != null &&
+          i >= breakStartMinutes &&
+          i < breakEndMinutes) continue;
+
       final nextTime = TimeOfDay(hour: i ~/ 60, minute: i % 60);
       timeSlots.add(nextTime);
     }
@@ -106,7 +117,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     setState(() {
       _bookedTimes = appointments
           .map((appointment) =>
-              TimeOfDay.fromDateTime(appointment.date.toLocal()))
+              TimeOfDay.fromDateTime(appointment.start.toLocal()))
           .toList();
     });
   }
@@ -130,7 +141,10 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
             _date.month == date.month &&
             _date.year == date.year;
 
-        return GestureDetector(
+        // Return a DateSelector widget
+        return DateSelector(
+          date: date,
+          isSelected: isSelected,
           onTap: () {
             setState(() {
               _date = DateTime(date.year, date.month, date.day, 0, 0, 0);
@@ -140,78 +154,29 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
             // Fetch appointments for the selected date
             _fetchAppointments();
           },
-          child: Container(
-            width: 60.0,
-            margin: const EdgeInsets.all(8.0),
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color.fromARGB(255, 126, 156, 252)
-                  : const Color.fromARGB(255, 230, 230, 230),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 5.0),
-                Text(
-                  '${date.day}',
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24.0,
-                  ),
-                ),
-                const SizedBox(height: 10.0),
-                Text(
-                  _weekdayToAbbreviatedString(date.weekday),
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       },
     );
 
+    // Generate time slots for the selected date
     List<Widget> timeList = _dateSelected &&
             widget.doctor!.workingHours[_weekdayToString(_date.weekday)] != null
         ? _generateTimeSlots(
-                widget.doctor!.workingHours[_weekdayToString(_date.weekday)]!)
+                widget.doctor!.workingHours[_weekdayToString(_date.weekday)]!,
+                widget.doctor!.breakHours[_weekdayToString(_date.weekday)]!)
             .map((time) {
             final isBooked = _isTimeBooked(time);
 
-            return GestureDetector(
-              onTap: isBooked
-                  ? null
-                  : () {
-                      setState(() {
-                        _time = time;
-                      });
-                    },
-              child: Container(
-                margin: const EdgeInsets.all(4.0),
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: isBooked
-                      ? Colors.grey[400]
-                      : _time == time
-                          ? const Color.fromARGB(255, 126, 156, 252)
-                          : const Color.fromARGB(255, 230, 230, 230),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  time.format(context),
-                  style: TextStyle(
-                    color: isBooked
-                        ? Colors.grey[300]
-                        : _time == time
-                            ? Colors.white
-                            : Colors.black,
-                  ),
-                ),
-              ),
+            // Return a TimeSelector widget
+            return TimeSelector(
+              time: time,
+              isBooked: isBooked,
+              isSelected: _time == time,
+              onTap: () {
+                setState(() {
+                  _time = time;
+                });
+              },
             );
           }).toList()
         : [];
@@ -278,35 +243,34 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: const Color.fromARGB(255, 220, 227, 255),
-        child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            child: ElevatedButton(
-              onPressed: _dateSelected && _time != null
-                  ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentPage(
-                            doctor: widget.doctor,
-                            userId: widget.userId,
-                            date: _date,
-                            time: _time!,
-                          ),
-                        ),
-                      );
-                    }
-                  : null,
-              child: Text(
-                'Next',
-                style: textTheme.labelLarge!.copyWith(
-                    color: Colors.white,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold),
+      bottomNavigationBar: BottomNavBarButtons(
+        isEnabled: _dateSelected && _time != null,
+        onPressed: () {
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) => PaymentPage(
+                doctor: widget.doctor,
+                userId: widget.userId,
+                date: _date,
+                time: _time!,
               ),
-            )),
+              transitionDuration: const Duration(microseconds: 200000),
+              transitionsBuilder: (context, animation, animationTime, child) {
+                animation =
+                    CurvedAnimation(parent: animation, curve: Curves.easeIn);
+                return SlideTransition(
+                  position: Tween(
+                          begin: const Offset(1.0, 0.0),
+                          end: const Offset(0.0, 0.0))
+                      .animate(animation),
+                  child: child,
+                );
+              },
+            ),
+          );
+        },
+        buttonText: 'Next',
       ),
     );
   }

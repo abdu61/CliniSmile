@@ -8,8 +8,13 @@ import 'package:flutter/material.dart' hide SearchBar;
 class CategoryPage extends StatelessWidget {
   final String categoryName;
   final String categoryId;
+  final bool isAllDoctors;
 
-  CategoryPage({required this.categoryName, required this.categoryId});
+  CategoryPage({
+    required this.categoryName,
+    required this.categoryId,
+    this.isAllDoctors = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,9 @@ class CategoryPage extends StatelessWidget {
         ),
       ),
       body: FutureBuilder<List<Doctor>>(
-        future: database.getDoctorsByCategory(categoryId),
+        future: isAllDoctors
+            ? database.getDoctors()
+            : database.getDoctorsByCategory(categoryId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Loading();

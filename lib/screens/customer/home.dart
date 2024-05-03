@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/services/auth.dart';
@@ -7,10 +8,11 @@ import 'package:dental_clinic/shared/loading.dart';
 import 'package:dental_clinic/shared/widgets/Lists/doctor_list_tile.dart';
 import 'package:dental_clinic/shared/widgets/cards/appointment_preview_card.dart';
 import 'package:dental_clinic/shared/widgets/category_circle.dart';
-import 'package:dental_clinic/screens/dynamic_pages/category_page.dart';
+import 'package:dental_clinic/screens/customer/dynamic_pages/category_page.dart';
 import 'package:dental_clinic/shared/widgets/section_title.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -51,7 +53,7 @@ class _HomeState extends State<Home> {
                 padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                 child: Column(
                   children: [
-                    _MyAppointment(),
+                    _MyAppointment(userId: userId ?? ''),
                     const SizedBox(height: 10),
                     _DoctorCategory(),
                     const SizedBox(height: 10),
@@ -206,19 +208,79 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 60.0);
 }
 
-// Appointment Preview Cards
 class _MyAppointment extends StatelessWidget {
-  const _MyAppointment({super.key});
+  final String userId;
+
+  const _MyAppointment({Key? key, required this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final dbService = DatabaseService(uid: userId);
+
     return Column(children: [
       SectionTitle(
         title: 'My Appointments',
         action: 'View all',
         onPressed: () {},
       ),
-      AppointmentPreviewCard(),
+      StreamBuilder<QuerySnapshot>(
+        stream: dbService.getAppointmentsByUserid(userId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+
+          final appointments = snapshot.data!.docs
+              .map((doc) => Appointment.fromFirestore(doc))
+              .toList()
+            ..sort((a, b) =>
+                a.start.compareTo(b.start)); // Sort appointments by date
+
+          if (appointments.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.fromARGB(255, 126, 156, 252),
+                    Color.fromARGB(255, 168, 188, 255),
+                  ],
+                ),
+              ),
+              child: SizedBox(
+                height: 90,
+                child: Center(
+                  child: Text(
+                    'No appointment yet',
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return SizedBox(
+            height: 160,
+            child: PageView.builder(
+              scrollDirection: Axis.vertical,
+              itemCount: appointments.length,
+              itemBuilder: (context, index) {
+                return AppointmentPreviewCard(appointment: appointments[index]);
+              },
+            ),
+          );
+        },
+      ),
     ]);
   }
 }
@@ -305,7 +367,18 @@ class _Doctors extends StatelessWidget {
               SectionTitle(
                 title: 'Our Doctors',
                 action: 'View all',
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CategoryPage(
+                        categoryName: 'All Doctors',
+                        categoryId: '',
+                        isAllDoctors: true,
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 4.0),
               ListView.builder(

@@ -1,5 +1,5 @@
 import 'package:dental_clinic/models/doctor.dart';
-import 'package:dental_clinic/screens/dynamic_pages/doctor_details.dart';
+import 'package:dental_clinic/screens/customer/dynamic_pages/doctor_details.dart';
 import 'package:flutter/material.dart';
 
 class DoctorListTile extends StatelessWidget {

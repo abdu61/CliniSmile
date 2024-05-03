@@ -1,12 +1,12 @@
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/shared/constant.dart';
-import 'package:dental_clinic/services/database.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class SignUp extends StatefulWidget {
   final Function toggleView;
-  SignUp({Key? key, required this.toggleView}) : super(key: key);
+  // ignore: prefer_const_constructors_in_immutables
+  SignUp({super.key, required this.toggleView});
 
   @override
   State<SignUp> createState() => _RegisterState();
@@ -75,7 +75,7 @@ class _RegisterState extends State<SignUp> {
                         validator: (val) {
                           Pattern pattern =
                               r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                          RegExp regex = new RegExp(pattern.toString());
+                          RegExp regex = RegExp(pattern.toString());
                           if (!regex.hasMatch(val!)) {
                             return 'Enter a valid email';
                           } else {
@@ -139,7 +139,7 @@ class _RegisterState extends State<SignUp> {
                               showPassword
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                              color: Theme.of(context).primaryColorDark,
+                              color: const Color.fromARGB(255, 126, 156, 252),
                             ),
                             onPressed: () {
                               // Update the state i.e. toogle the state of passwordVisible variable
@@ -154,7 +154,9 @@ class _RegisterState extends State<SignUp> {
 
                       //SignUp Button
                       ElevatedButton(
-                        style: buttonAuthenticateStyle,
+                        style: buttonAuthenticateStyle.copyWith(
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 126, 156, 252))),
                         onPressed: () async {
                           //Registration
                           if (_formKey.currentState!.validate()) {
@@ -168,8 +170,11 @@ class _RegisterState extends State<SignUp> {
                           }
                         },
                         child: const Text(
-                          'SignUp',
-                          style: TextStyle(color: Colors.white),
+                          'Sign Up',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(height: 12.0),
@@ -196,7 +201,7 @@ class _RegisterState extends State<SignUp> {
                       TextSpan(
                         text: 'Sign In',
                         style: const TextStyle(
-                          color: Color(0xFF254EDB),
+                          color: Color.fromARGB(255, 77, 119, 255),
                           fontSize: 14.0,
                         ),
                         recognizer: TapGestureRecognizer()

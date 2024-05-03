@@ -10,7 +10,8 @@ class Doctor {
   final double rating;
   final int reviewCount;
   final int experience;
-  final Map<String, List<String>> workingHours; // New field
+  final Map<String, List<String>> workingHours;
+  final Map<String, List<String>> breakHours; // New field
 
   Doctor({
     required this.id,
@@ -21,18 +22,29 @@ class Doctor {
     this.rating = 0.0,
     this.reviewCount = 0,
     this.experience = 0,
-    required this.workingHours, // New field
+    required this.workingHours,
+    required this.breakHours, // New field
   });
 
   factory Doctor.fromFirestore(DocumentSnapshot doc, Category category) {
     Map data = doc.data() as Map;
     Map<String, List<String>> workingHours = {};
+    Map<String, List<String>> breakHours = {}; // New field
 
     if (data.containsKey('workingHours')) {
       try {
         workingHours = Map<String, List<String>>.from(data['workingHours']);
       } catch (e) {
         print('Error parsing workingHours: $e');
+      }
+    }
+
+    if (data.containsKey('breakHours')) {
+      // New field
+      try {
+        breakHours = Map<String, List<String>>.from(data['breakHours']);
+      } catch (e) {
+        print('Error parsing breakHours: $e');
       }
     }
 
@@ -46,6 +58,7 @@ class Doctor {
       reviewCount: data['reviewCount'] ?? 0,
       experience: data['experience'] ?? 0,
       workingHours: workingHours,
+      breakHours: breakHours, // New field
     );
   }
 
@@ -59,7 +72,8 @@ class Doctor {
       'rating': rating,
       'reviewCount': reviewCount,
       'experience': experience,
-      'workingHours': workingHours, // New field
+      'workingHours': workingHours,
+      'breakHours': breakHours, // New field
     };
   }
 }

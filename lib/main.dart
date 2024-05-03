@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:dental_clinic/models/user.dart';
 import 'package:dental_clinic/screens/wrapper.dart';
 import 'package:dental_clinic/services/auth.dart';
