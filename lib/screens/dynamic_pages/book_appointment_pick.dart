@@ -1,5 +1,6 @@
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/screens/dynamic_pages/payment.dart';
+import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/widgets/cards/doctor_card.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +16,12 @@ class BookAppointmentPage extends StatefulWidget {
 
 class _BookAppointmentPageState extends State<BookAppointmentPage> {
   DateTime _date = DateTime.now();
-  TimeOfDay _time = TimeOfDay.now();
+  TimeOfDay? _time;
   bool _dateSelected = false;
+  List<TimeOfDay> _bookedTimes = [];
+
+  // Add your database service instance
+  final DatabaseService _databaseService = DatabaseService(uid: 'uid');
 
   String _weekdayToString(int weekday) {
     switch (weekday) {
@@ -91,6 +96,26 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     return timeSlots;
   }
 
+  // Fetch appointments for the selected doctor and date
+  void _fetchAppointments() async {
+    final appointments = await _databaseService.getAppointmentsByDoctorAndDate(
+      widget.doctor!.id,
+      _date,
+    );
+
+    setState(() {
+      _bookedTimes = appointments
+          .map((appointment) =>
+              TimeOfDay.fromDateTime(appointment.date.toLocal()))
+          .toList();
+    });
+  }
+
+  bool _isTimeBooked(TimeOfDay time) {
+    return _bookedTimes.any((bookedTime) =>
+        bookedTime.hour == time.hour && bookedTime.minute == time.minute);
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -108,9 +133,12 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         return GestureDetector(
           onTap: () {
             setState(() {
-              _date = date;
+              _date = DateTime(date.year, date.month, date.day, 0, 0, 0);
               _dateSelected = true;
             });
+
+            // Fetch appointments for the selected date
+            _fetchAppointments();
           },
           child: Container(
             width: 60.0,
@@ -152,25 +180,35 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         ? _generateTimeSlots(
                 widget.doctor!.workingHours[_weekdayToString(_date.weekday)]!)
             .map((time) {
+            final isBooked = _isTimeBooked(time);
+
             return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _time = time;
-                });
-              },
+              onTap: isBooked
+                  ? null
+                  : () {
+                      setState(() {
+                        _time = time;
+                      });
+                    },
               child: Container(
                 margin: const EdgeInsets.all(4.0),
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: _time == time
-                      ? const Color.fromARGB(255, 126, 156, 252)
-                      : const Color.fromARGB(255, 230, 230, 230),
+                  color: isBooked
+                      ? Colors.grey[400]
+                      : _time == time
+                          ? const Color.fromARGB(255, 126, 156, 252)
+                          : const Color.fromARGB(255, 230, 230, 230),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
-                  '${time.format(context)}',
+                  time.format(context),
                   style: TextStyle(
-                    color: _time == time ? Colors.white : Colors.black,
+                    color: isBooked
+                        ? Colors.grey[300]
+                        : _time == time
+                            ? Colors.white
+                            : Colors.black,
                   ),
                 ),
               ),
@@ -181,7 +219,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Doctor Details',
+          'Book Appointment',
           style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color.fromARGB(255, 220, 227, 255),
@@ -243,30 +281,32 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       bottomNavigationBar: BottomAppBar(
         color: const Color.fromARGB(255, 220, 227, 255),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PaymentPage(
-                    doctor: widget.doctor,
-                    userId: widget.userId,
-                    date: _date,
-                    time: _time,
-                  ),
-                ),
-              );
-            },
-            child: Text(
-              'Next',
-              style: textTheme.labelLarge!.copyWith(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: ElevatedButton(
+              onPressed: _dateSelected && _time != null
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentPage(
+                            doctor: widget.doctor,
+                            userId: widget.userId,
+                            date: _date,
+                            time: _time!,
+                          ),
+                        ),
+                      );
+                    }
+                  : null,
+              child: Text(
+                'Next',
+                style: textTheme.labelLarge!.copyWith(
+                    color: Colors.white,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold),
+              ),
+            )),
       ),
     );
   }

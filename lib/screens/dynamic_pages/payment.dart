@@ -33,23 +33,84 @@ class _PaymentPageState extends State<PaymentPage> {
       final end = start.add(
           Duration(minutes: 30)); // Assuming each appointment lasts 30 minutes
 
-      await _appointmentsCollection.add({
-        'doctorId': widget.doctor!.id,
-        'userId': widget.userId,
-        'start': start,
-        'end': end,
-        'paymentMethod': _paymentMethod,
-      });
+      // Check if the slot is already booked
+      final snapshot = await _appointmentsCollection
+          .where('doctorId', isEqualTo: widget.doctor!.id)
+          .where('start', isEqualTo: start)
+          .get();
 
-      Navigator.pop(context);
+      if (snapshot.docs.isEmpty) {
+        await _appointmentsCollection.add({
+          'doctorId': widget.doctor!.id,
+          'userId': widget.userId,
+          'start': start,
+          'end': end,
+          'paymentMethod': _paymentMethod,
+          'bookingTime': DateTime.now(),
+          'billedAmount': '100.0',
+        });
+
+        // Show a dialog that says "Appointment successful"
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Appointment successful'),
+              content: Text('Your appointment has been booked successfully.'),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop(); // Pop the dialog
+                    }
+
+                    int count = 0;
+                    while (Navigator.of(context).canPop() && count < 3) {
+                      Navigator.of(context)
+                          .pop(); // Pop the current and previous pages
+                      count++;
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // Show a dialog that says "Slot already booked"
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Slot already booked'),
+              content: Text('Please select a different slot.'),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    // Pop the dialog
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payment'),
+        title: Text(
+          'Payment',
+          style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color.fromARGB(255, 220, 227, 255),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -78,13 +139,28 @@ class _PaymentPageState extends State<PaymentPage> {
                   return null;
                 },
               ),
-
-              // Pay button
-              ElevatedButton(
-                onPressed: _pay,
-                child: Text('Pay'),
+              const SizedBox(height: 16.0),
+              Text(
+                'Billed Amount: \$100.0',
+                style: textTheme.titleMedium,
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: const Color.fromARGB(255, 220, 227, 255),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          child: ElevatedButton(
+            onPressed: _pay,
+            child: Text(
+              'Pay',
+              style: textTheme.labelLarge!.copyWith(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ),

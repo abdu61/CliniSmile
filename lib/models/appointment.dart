@@ -7,7 +7,9 @@ class Appointment {
   final DateTime date;
   final TimeOfDay time;
   final String status;
-  final String paymentMethod; // New field
+  final String paymentMethod;
+  final DateTime bookingTime;
+  final String billedAmount;
 
   Appointment({
     required this.id,
@@ -16,6 +18,8 @@ class Appointment {
     required this.date,
     required this.time,
     required this.status,
-    required this.paymentMethod, // New field
+    required this.paymentMethod,
+    required this.bookingTime,
+    this.billedAmount = '0.0',
   });
 }

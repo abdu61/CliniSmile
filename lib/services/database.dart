@@ -229,7 +229,9 @@ class DatabaseService {
       'date': appointment.date,
       'time': formattedTime,
       'status': appointment.status,
-      'paymentMethod': appointment.paymentMethod, // New field
+      'paymentMethod': appointment.paymentMethod,
+      'bookingTime': appointment.bookingTime,
+      'billedAmount': appointment.billedAmount,
     });
   }
 
@@ -249,7 +251,10 @@ class DatabaseService {
         time: TimeOfDay.fromDateTime(DateTime.parse(
             '2022-01-01 ${data['time']}')), // Convert String to TimeOfDay
         status: data['status'] ?? 'pending',
-        paymentMethod: data['paymentMethod'] ?? '', // New field
+        paymentMethod: data['paymentMethod'] ?? '',
+        bookingTime: (data['bookingTime'] as Timestamp)
+            .toDate(), // Convert Timestamp to DateTime
+        billedAmount: data['billedAmount'] ?? '0.0',
       );
     }).toList();
   }
@@ -262,8 +267,57 @@ class DatabaseService {
       'date': appointment.date,
       'time': formattedTime,
       'status': appointment.status,
-      'paymentMethod': appointment.paymentMethod, // New field
+      'paymentMethod': appointment.paymentMethod,
+      'bookingTime': appointment.bookingTime, // Update bookingTime
     });
+  }
+
+  Future<List<Appointment>> getAppointmentsByDoctorAndDate(
+      String doctorId, DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay =
+        startOfDay.add(Duration(days: 1)).subtract(Duration(seconds: 1));
+
+    print('Fetching appointments for doctorId: $doctorId, date: $date');
+
+    final snapshot = await _appointmentsCollection
+        .where('doctorId', isEqualTo: doctorId)
+        .where('start', isGreaterThanOrEqualTo: startOfDay)
+        .where('start', isLessThanOrEqualTo: endOfDay)
+        .get();
+
+    print('Fetched ${snapshot.docs.length} appointments');
+
+    return snapshot.docs
+        .map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+          print('Processing appointment with id: ${doc.id}');
+
+          if (data['start'] == null) {
+            print('Skipping appointment with id: ${doc.id} due to null start');
+            return null;
+          }
+
+          DateTime start = (data['start'] as Timestamp).toDate().toUtc();
+          TimeOfDay time = TimeOfDay.fromDateTime(start);
+
+          print('Creating appointment with id: ${doc.id}');
+          return Appointment(
+            id: doc.id,
+            doctorId: data['doctorId'] ?? '',
+            userId: data['userId'] ?? '',
+            date: start,
+            time: time,
+            status: data['status'] ?? 'pending',
+            paymentMethod: data['paymentMethod'] ?? '',
+            bookingTime: (data['bookingTime'] as Timestamp)
+                .toDate(), // Convert Timestamp to DateTime
+          );
+        })
+        .where((appointment) => appointment != null)
+        .toList()
+        .cast<Appointment>();
   }
 
   Future<void> deleteAppointment(String id) {
