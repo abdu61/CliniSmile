@@ -6,6 +6,7 @@ import 'package:dental_clinic/shared/widgets/DateTime%20pickers/time_selector.da
 import 'package:dental_clinic/shared/widgets/cards/doctor_card.dart';
 import 'package:dental_clinic/shared/widgets/core.dart/bottom_navbar_button.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BookAppointmentPage extends StatefulWidget {
   final Doctor? doctor;
@@ -22,6 +23,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   TimeOfDay? _time;
   bool _dateSelected = false;
   List<TimeOfDay> _bookedTimes = [];
+  // Add a new variable to keep track of the selected month
+  DateTime _selectedMonth = DateTime.now();
 
   // Add your database service instance
   final DatabaseService _databaseService = DatabaseService(uid: 'uid');
@@ -108,6 +111,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   }
 
   // Fetch appointments for the selected doctor and date
+
   void _fetchAppointments() async {
     final appointments = await _databaseService.getAppointmentsByDoctorAndDate(
       widget.doctor!.id,
@@ -131,11 +135,23 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
+    // Calculate the number of days in the selected month
+    final daysInMonth =
+        DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
+
     final dateList = ListView.builder(
       scrollDirection: Axis.horizontal,
-      itemCount: 20,
+      itemCount: daysInMonth,
       itemBuilder: (context, index) {
-        final date = DateTime.now().add(Duration(days: index));
+        // Use the selected month and index to create the date
+        final date =
+            DateTime(_selectedMonth.year, _selectedMonth.month, index + 1);
+
+        // Only show dates from the current day forward
+        if (date.isBefore(DateTime.now()) && date.day != DateTime.now().day) {
+          return Container(); // Return an empty container for past dates
+        }
+
         final isSelected = _dateSelected &&
             _date.day == date.day &&
             _date.month == date.month &&
@@ -146,13 +162,17 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           date: date,
           isSelected: isSelected,
           onTap: () {
-            setState(() {
-              _date = DateTime(date.year, date.month, date.day, 0, 0, 0);
-              _dateSelected = true;
-            });
+            // Only allow selection if the date is today or in the future
+            if (date.isAfter(DateTime.now()) ||
+                date.day == DateTime.now().day) {
+              setState(() {
+                _date = DateTime(date.year, date.month, date.day, 0, 0, 0);
+                _dateSelected = true;
+              });
 
-            // Fetch appointments for the selected date
-            _fetchAppointments();
+              // Fetch appointments for the selected date
+              _fetchAppointments();
+            }
           },
         );
       },
@@ -189,58 +209,102 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         ),
         backgroundColor: const Color.fromARGB(255, 220, 227, 255),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            DoctorCard(
-              doctor: widget.doctor!,
-              showAbout: false,
-              showMoreInformation: false,
-            ),
-            // Date list
-            SizedBox(
-              height: 125,
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
+          ),
+          child: IntrinsicHeight(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Select Date',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
+                  DoctorCard(
+                    doctor: widget.doctor!,
+                    showAbout: false,
+                    showMoreInformation: false,
+                  ),
+                  // Add a row for month selection
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back),
+                        onPressed:
+                            _selectedMonth.month == DateTime.now().month &&
+                                    _selectedMonth.year == DateTime.now().year
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _selectedMonth = DateTime(
+                                          _selectedMonth.year,
+                                          _selectedMonth.month - 1);
+                                    });
+                                  },
+                      ),
+                      Text(
+                        DateFormat('MMMM yyyy').format(_selectedMonth),
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: () {
+                          setState(() {
+                            _selectedMonth = DateTime(
+                                _selectedMonth.year, _selectedMonth.month + 1);
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  // Date list
+                  const SizedBox(height: 8.0),
+                  SizedBox(
+                    height: 125,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Select Date',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        const SizedBox(height: 4.0),
+                        Expanded(child: dateList),
+                        const SizedBox(height: 4.0),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4.0),
-                  Expanded(child: dateList),
-                  const SizedBox(height: 4.0),
+                  // Time list
+                  if (timeList.isNotEmpty)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8.0),
+                          const Text(
+                            'Select Time',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                            ),
+                          ),
+                          const SizedBox(height: 4.0),
+                          Expanded(
+                            child: Wrap(
+                              children: timeList,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
-            // Time list
-            if (timeList.isNotEmpty)
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8.0),
-                    const Text(
-                      'Select Time',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
-                      ),
-                    ),
-                    const SizedBox(height: 4.0),
-                    Expanded(
-                      child: Wrap(
-                        children: timeList,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavBarButtons(
