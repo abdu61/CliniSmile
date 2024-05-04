@@ -72,7 +72,7 @@ class CustomerNavigationController extends GetxController
   // The screens for each navigation item.
   final screens = [
     Home(),
-    Appointment(),
+    AppointmentPage(),
     Feed(),
     Chat(),
     Profile(),
@@ -93,8 +93,8 @@ class CustomerNavigationController extends GetxController
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-      selectedIndex.value = 0;
-    }
+    // if (state == AppLifecycleState.resumed) {
+    //   selectedIndex.value = 0;
+    // }
   }
 }

@@ -12,7 +12,6 @@ import 'package:dental_clinic/screens/customer/dynamic_pages/category_page.dart'
 import 'package:dental_clinic/shared/widgets/section_title.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -208,6 +207,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 60.0);
 }
 
+// Show My Appointment as Cards
 class _MyAppointment extends StatelessWidget {
   final String userId;
 

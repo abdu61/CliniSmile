@@ -11,6 +11,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   final AuthService _auth = AuthService();
   bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,34 +26,47 @@ class _ProfileState extends State<Profile> {
         ),
         backgroundColor: const Color.fromARGB(255, 220, 227, 255),
         elevation: 0.0,
-        //sign out button
-        actions: <Widget>[
-          TextButton.icon(
-            onPressed: () async {
-              //sign out
-              setState(() => loading = true);
-              await _auth.signOut();
-              if (mounted) {
-                setState(() => loading = false);
-              }
-            },
-            icon: const Icon(
-              Icons.person,
-              color: Colors.black,
-            ),
-            label: const Text(
-              'logout',
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(8.0),
+        children: <Widget>[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                //sign out
+                setState(() => loading = true);
+                await _auth.signOut();
+                if (mounted) {
+                  setState(() => loading = false);
+                }
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    const Color.fromARGB(255, 241, 241, 241)),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              child: const Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 12.0),
+                  child: Text(
+                    'Log out',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Color.fromARGB(255, 255, 112, 102),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
         ],
-      ),
-      body: const Center(
-        child: Text('Profile'),
       ),
     );
   }
