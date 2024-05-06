@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/models/doctor.dart';
+import 'package:dental_clinic/screens/customer/appointment.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
@@ -221,7 +222,10 @@ class _MyAppointment extends StatelessWidget {
       SectionTitle(
         title: 'My Appointments',
         action: 'View all',
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => AppointmentPage()));
+        },
       ),
       StreamBuilder<QuerySnapshot>(
         stream: dbService.getAppointmentsByUserid(userId),

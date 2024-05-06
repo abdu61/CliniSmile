@@ -46,10 +46,11 @@ class _PaymentPageState extends State<PaymentPage> {
           'userId': widget.userId,
           'start': start,
           'end': end,
-          'status': 'Pending',
+          'status': 'Open',
           'paymentMethod': _paymentMethod,
           'bookingTime': DateTime.now(),
           'billedAmount': '5.0',
+          'userMode': 'Online',
         });
 
         // Show a dialog that says "Appointment successful"

@@ -186,14 +186,14 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                     children: <TextSpan>[
                                       TextSpan(
                                         text: '${doctor?.name ?? ''}\n',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16.0,
                                           color: Colors.black,
                                         ),
                                       ),
                                       TextSpan(
-                                        text: '${doctor?.category.name ?? ''}',
+                                        text: doctor?.category.name ?? '',
                                         style: TextStyle(
                                           fontWeight: FontWeight.normal,
                                           fontSize: 10.0,
@@ -207,7 +207,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             ),
                             subtitle: Text(
                               'On ${DateFormat('dd-MM-yyyy').format(appointment.start)}\nat ${DateFormat('HH:mm:ss').format(appointment.start)}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.w500,
@@ -239,11 +239,55 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                           },
                                         ),
                                         ListTile(
-                                          leading: Icon(Icons.delete),
-                                          title: Text('Delete'),
+                                          leading: const Icon(Icons.delete),
+                                          title: const Text('Delete'),
                                           onTap: () {
-                                            // Update appointment
-                                            Navigator.pop(context);
+                                            print(
+                                                'Delete button tapped, appointment id: ${appointment.id}');
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                      'Delete appointment'),
+                                                  content: const Text(
+                                                      'Are you sure you want to delete this appointment?'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      child:
+                                                          const Text('Cancel'),
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                        Navigator.pop(context);
+                                                      },
+                                                    ),
+                                                    TextButton(
+                                                      child:
+                                                          const Text('Delete'),
+                                                      onPressed: () async {
+                                                        try {
+                                                          await dbService
+                                                              .deleteAppointment(
+                                                                  appointment
+                                                                      .id);
+                                                          f(mounted) {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close the dialog
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Close the bottom sheet
+                                                          }
+                                                        } catch (e) {
+                                                          print(
+                                                              'Error deleting appointment: $e');
+                                                        }
+                                                      },
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
                                           },
                                         ),
                                       ],

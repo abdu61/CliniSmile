@@ -15,12 +15,12 @@ class Appointment {
   final String? phoneNumber;
 
   Appointment({
-    required this.id,
+    this.id = '',
     required this.doctorId,
     required this.userId,
     required this.start,
     required this.end,
-    this.status = 'Pending',
+    this.status = 'Open',
     required this.paymentMethod,
     required this.bookingTime,
     this.billedAmount = '0.0',

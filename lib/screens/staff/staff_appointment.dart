@@ -31,7 +31,7 @@ class _StaffAppointmentState extends State<StaffAppointment> {
   String name = '';
   String phoneNumber = '';
   Map<String, Doctor?> doctorDetails = {};
-  Map<String, String> userDetails = {};
+  Map<String, String?> userDetails = {};
   List<Doctor> doctors = [];
   String selectedDoctorId = '';
 
@@ -60,15 +60,21 @@ class _StaffAppointmentState extends State<StaffAppointment> {
     var userIds = appointments.map((a) => a.userId).toSet().toList();
     // Fetch user details for each unique user ID
     for (var userId in userIds) {
-      try {
-        DocumentSnapshot userDoc =
-            await widget.databaseService.getUserById(userId);
-        String userName = (userDoc.data() as Map<String, dynamic>)?['name'] ??
-            'Unknown'; // Get the user's name
-        userDetails[userId] =
-            userName; // Assign the user's name to userDetails[userId]
-      } catch (e) {
-        print('Failed to fetch user details: $e');
+      if (userId.isEmpty) {
+        // If userId is empty, use the name field from the Appointment object
+        var appointment = appointments.firstWhere((a) => a.userId == userId);
+        userDetails[userId] = appointment.name;
+      } else {
+        try {
+          DocumentSnapshot userDoc =
+              await widget.databaseService.getUserById(userId);
+          String userName = (userDoc.data() as Map<String, dynamic>)?['name'] ??
+              'Unknown'; // Get the user's name
+          userDetails[userId] =
+              userName; // Assign the user's name to userDetails[userId]
+        } catch (e) {
+          print('Failed to fetch user details: $e');
+        }
       }
     }
   }

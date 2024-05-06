@@ -1,11 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:dental_clinic/consts.dart';
 import 'package:dental_clinic/models/user.dart';
 import 'package:dental_clinic/screens/wrapper.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,7 @@ Future<void> main() async {
       storageBucket: 'dental-app-ab452.appspot.com',
     ),
   );
+  Gemini.init(apiKey: GEMINI_API_KEY);
   runApp(MyApp());
 }
 

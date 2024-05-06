@@ -5,6 +5,7 @@ import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AddAppointmentDialog extends StatefulWidget {
   final DatabaseService databaseService;
@@ -99,28 +100,32 @@ class _AddAppointmentDialogState extends State<AddAppointmentDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          Doctor? selectedDoctor;
-                          for (var doctor in doctors) {
-                            if (doctor.id == selectedDoctorId) {
-                              selectedDoctor = doctor;
-                              break;
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            Doctor? selectedDoctor;
+                            for (var doctor in doctors) {
+                              if (doctor.id == selectedDoctorId) {
+                                selectedDoctor = doctor;
+                                break;
+                              }
+                            }
+                            if (selectedDoctor != null) {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BookAppointmentPage(
+                                    doctor: selectedDoctor,
+                                    name: name,
+                                    phoneNumber: phoneNumber,
+                                    isStaff: true,
+                                  ),
+                                ),
+                              );
                             }
                           }
-                          if (selectedDoctor != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    BookAppointmentPage(doctor: selectedDoctor),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: const Text('Next'),
-                    ),
+                        },
+                        child: const Text('Next')),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);

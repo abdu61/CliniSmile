@@ -1,3 +1,4 @@
+import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/screens/customer/dynamic_pages/payment.dart';
 import 'package:dental_clinic/services/database.dart';
@@ -12,9 +13,12 @@ import 'package:intl/intl.dart';
 class BookAppointmentPage extends StatefulWidget {
   final Doctor? doctor;
   final String? userId;
+  final String? name;
+  final String? phoneNumber;
+  final bool? isStaff;
 
-  BookAppointmentPage({this.doctor, this.userId});
-
+  BookAppointmentPage(
+      {this.doctor, this.userId, this.name, this.phoneNumber, this.isStaff});
   @override
   _BookAppointmentPageState createState() => _BookAppointmentPageState();
 }
@@ -129,6 +133,54 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   bool _isTimeBooked(TimeOfDay time) {
     return _bookedTimes.any((bookedTime) =>
         bookedTime.hour == time.hour && bookedTime.minute == time.minute);
+  }
+
+  // Book Appointment function for Staff Appointments
+  void _bookAppointment() async {
+    if (_time != null) {
+      // Create a new Appointment object
+      Appointment appointment = Appointment(
+        doctorId: widget.doctor!.id,
+        userId: '',
+        start: DateTime(
+            _date.year, _date.month, _date.day, _time!.hour, _time!.minute),
+        end: DateTime(
+                _date.year, _date.month, _date.day, _time!.hour, _time!.minute)
+            .add(Duration(minutes: 30)),
+        status: 'Open',
+        paymentMethod: '', // Set this to the appropriate value
+        bookingTime: DateTime.now(),
+        billedAmount: '', // Set this to the appropriate value
+        userMode: 'Offline',
+        name: widget.name,
+        phoneNumber: widget.phoneNumber,
+      );
+
+      try {
+        // Add the appointment to the database
+        await _databaseService.addAppointment(appointment);
+
+        // Show a success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Appointment booked successfully!')),
+        );
+
+        // Navigate back to the previous page
+        Navigator.pop(context);
+      } catch (e) {
+        // Show a failure message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to book appointment: $e')),
+        );
+      }
+    } else {
+      // Handle the case where _time is null
+      print('Time is not selected');
+      // Show a failure message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Time is not selected')),
+      );
+    }
   }
 
   @override
@@ -310,31 +362,37 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       bottomNavigationBar: BottomNavBarButtons(
         isEnabled: _dateSelected && _time != null,
         onPressed: () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation1, animation2) => PaymentPage(
-                doctor: widget.doctor,
-                userId: widget.userId,
-                date: _date,
-                time: _time!,
+          if (widget.isStaff == true) {
+            // Book the appointment directly
+            // You'll need to implement the _bookAppointment function
+            _bookAppointment();
+          } else {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) => PaymentPage(
+                  doctor: widget.doctor,
+                  userId: widget.userId,
+                  date: _date,
+                  time: _time!,
+                ),
+                transitionDuration: const Duration(microseconds: 200000),
+                transitionsBuilder: (context, animation, animationTime, child) {
+                  animation =
+                      CurvedAnimation(parent: animation, curve: Curves.easeIn);
+                  return SlideTransition(
+                    position: Tween(
+                            begin: const Offset(1.0, 0.0),
+                            end: const Offset(0.0, 0.0))
+                        .animate(animation),
+                    child: child,
+                  );
+                },
               ),
-              transitionDuration: const Duration(microseconds: 200000),
-              transitionsBuilder: (context, animation, animationTime, child) {
-                animation =
-                    CurvedAnimation(parent: animation, curve: Curves.easeIn);
-                return SlideTransition(
-                  position: Tween(
-                          begin: const Offset(1.0, 0.0),
-                          end: const Offset(0.0, 0.0))
-                      .animate(animation),
-                  child: child,
-                );
-              },
-            ),
-          );
+            );
+          }
         },
-        buttonText: 'Next',
+        buttonText: widget.isStaff == true ? 'Book Appointment' : 'Next',
       ),
     );
   }

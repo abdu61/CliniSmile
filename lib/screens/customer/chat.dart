@@ -1,4 +1,9 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 
 class Chat extends StatefulWidget {
   const Chat({Key? key}) : super(key: key);
@@ -8,98 +13,91 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  final List<Message> _messages = [];
-  final TextEditingController _controller = TextEditingController();
+  final Gemini gemini = Gemini.instance;
 
-  void _handleSubmitted(String text) {
-    _controller.clear();
+  List<ChatMessage> messages = [];
 
-    setState(() {
-      _messages.insert(0, Message(text: text, from: 'user'));
-    });
-  }
+  ChatUser user = ChatUser(id: "1", firstName: "Abdu", lastName: '');
+  ChatUser geminiUser = ChatUser(
+    id: "2",
+    firstName: "Gemini",
+  );
 
   @override
   Widget build(BuildContext context) {
+    gemini
+        .listModels()
+        .then((models) => print(models))
+
+        /// list
+        .catchError((e) => print(e));
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat'),
+        title: const Text('Support'),
+        backgroundColor: const Color.fromARGB(255, 220, 227, 255),
       ),
-      body: Column(
-        children: <Widget>[
-          Flexible(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              reverse: true,
-              itemCount: _messages.length,
-              itemBuilder: (_, int index) {
-                final message = _messages[index];
-                final bool isUserMessage = message.from == 'user';
-
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Row(
-                    mainAxisAlignment: isUserMessage
-                        ? MainAxisAlignment.end
-                        : MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 10.0),
-                        decoration: BoxDecoration(
-                          color: isUserMessage
-                              ? Colors.blue[100]
-                              : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Text(message.text),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 8.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              color: Colors.grey[200],
-            ),
-            child: Row(
-              children: <Widget>[
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: TextField(
-                      controller: _controller,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Type a message",
-                      ),
-                      onSubmitted: _handleSubmitted,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () => _handleSubmitted(_controller.text),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      body: _buildUI(),
     );
   }
-}
 
-class Message {
-  final String text;
-  final String from;
+  Widget _buildUI() {
+    return DashChat(
+      currentUser: user,
+      onSend: _handleSubmitted,
+      messages: messages,
+    );
+  }
 
-  Message({required this.text, required this.from});
+  void _handleSubmitted(ChatMessage chatMessage) {
+    setState(() {
+      messages = [chatMessage, ...messages];
+    });
+    try {
+      String question = chatMessage.text;
+      List<Uint8List>? images;
+      if (chatMessage.medias?.isNotEmpty ?? false) {
+        images = [
+          File(chatMessage.medias!.first.url).readAsBytesSync(),
+        ];
+      }
+
+      // Start a new conversation with the user's question
+
+      gemini
+          .streamGenerateContent(
+        question,
+        images: images,
+      )
+          .listen((event) {
+        ChatMessage? lastMessage = messages.firstOrNull;
+        if (lastMessage != null && lastMessage.user == geminiUser) {
+          lastMessage = messages.removeAt(0);
+          String response = event.content?.parts?.fold(
+                  "", (previous, current) => "$previous ${current.text}") ??
+              "";
+          lastMessage.text += response;
+          setState(
+            () {
+              messages = [lastMessage!, ...messages];
+            },
+          );
+        } else {
+          String response = event.content?.parts?.fold(
+                  "", (previous, current) => "$previous ${current.text}") ??
+              "";
+          ChatMessage message = ChatMessage(
+            user: geminiUser,
+            createdAt: DateTime.now(),
+            text: response,
+          );
+          setState(() {
+            messages = [message, ...messages];
+          });
+        }
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 }
