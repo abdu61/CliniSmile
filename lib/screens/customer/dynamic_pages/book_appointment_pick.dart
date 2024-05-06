@@ -5,6 +5,7 @@ import 'package:dental_clinic/shared/widgets/DateTime%20pickers/date_selector.da
 import 'package:dental_clinic/shared/widgets/DateTime%20pickers/time_selector.dart';
 import 'package:dental_clinic/shared/widgets/cards/doctor_card.dart';
 import 'package:dental_clinic/shared/widgets/core.dart/bottom_navbar_button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -111,7 +112,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   }
 
   // Fetch appointments for the selected doctor and date
-
   void _fetchAppointments() async {
     final appointments = await _databaseService.getAppointmentsByDoctorAndDate(
       widget.doctor!.id,
@@ -261,7 +261,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   // Date list
                   const SizedBox(height: 8.0),
                   SizedBox(
-                    height: 125,
+                    height: kIsWeb ? 140 : 125,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

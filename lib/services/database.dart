@@ -39,6 +39,10 @@ class DatabaseService {
     return await userCollection.doc(uid).get();
   }
 
+  Future<DocumentSnapshot> getUserById(String id) async {
+    return await userCollection.doc(id).get();
+  }
+
   Future<void> deleteUserData() async {
     return await userCollection.doc(uid).delete();
   }
@@ -289,6 +293,9 @@ class DatabaseService {
       'paymentMethod': appointment.paymentMethod,
       'bookingTime': appointment.bookingTime,
       'billedAmount': appointment.billedAmount,
+      'userMode': appointment.userMode,
+      'name': appointment.name,
+      'phoneNumber': appointment.phoneNumber,
     });
   }
 
@@ -309,6 +316,9 @@ class DatabaseService {
         paymentMethod: data['paymentMethod'] ?? '',
         bookingTime: (data['bookingTime'] as Timestamp).toDate(),
         billedAmount: data['billedAmount'] ?? '0.0',
+        userMode: data['userMode'] ?? 'Online',
+        name: data['name'],
+        phoneNumber: data['phoneNumber'],
       );
     }).toList();
   }
@@ -322,6 +332,10 @@ class DatabaseService {
       'status': appointment.status,
       'paymentMethod': appointment.paymentMethod,
       'bookingTime': appointment.bookingTime,
+      'billedAmount': appointment.billedAmount,
+      'userMode': appointment.userMode,
+      'name': appointment.name,
+      'phoneNumber': appointment.phoneNumber,
     });
   }
 
@@ -350,6 +364,9 @@ class DatabaseService {
         paymentMethod: data['paymentMethod'] ?? '',
         bookingTime: (data['bookingTime'] as Timestamp).toDate(),
         billedAmount: data['billedAmount'] ?? '0.0',
+        userMode: data['userMode'] ?? 'Online',
+        name: data['name'],
+        phoneNumber: data['phoneNumber'],
       );
     }).toList();
   }
@@ -362,5 +379,58 @@ class DatabaseService {
     return _appointmentsCollection
         .where('userId', isEqualTo: userId)
         .snapshots();
+  }
+
+  Future<List<Appointment>> getAllAppointments() async {
+    final snapshot = await _appointmentsCollection.get();
+
+    return snapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      return Appointment(
+        id: doc.id,
+        doctorId: data['doctorId'] ?? '',
+        userId: data['userId'] ?? '',
+        start: (data['start'] as Timestamp).toDate(),
+        end: (data['end'] as Timestamp).toDate(),
+        status: data['status'] ?? 'pending',
+        paymentMethod: data['paymentMethod'] ?? '',
+        bookingTime: (data['bookingTime'] as Timestamp).toDate(),
+        billedAmount: data['billedAmount'] ?? '0.0',
+        userMode: data['userMode'] ?? 'Online',
+        name: data['name'],
+        phoneNumber: data['phoneNumber'],
+      );
+    }).toList();
+  }
+
+  Future<List<Appointment>> getAppointmentsByDate(DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay =
+        startOfDay.add(Duration(days: 1)).subtract(Duration(seconds: 1));
+
+    final snapshot = await _appointmentsCollection
+        .where('start', isGreaterThanOrEqualTo: startOfDay)
+        .where('start', isLessThanOrEqualTo: endOfDay)
+        .get();
+
+    return snapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      return Appointment(
+        id: doc.id,
+        doctorId: data['doctorId'] ?? '',
+        userId: data['userId'] ?? '',
+        start: (data['start'] as Timestamp).toDate(),
+        end: (data['end'] as Timestamp).toDate(),
+        status: data['status'] ?? 'pending',
+        paymentMethod: data['paymentMethod'] ?? '',
+        bookingTime: (data['bookingTime'] as Timestamp).toDate(),
+        billedAmount: data['billedAmount'] ?? '0.0',
+        userMode: data['userMode'] ?? 'Online',
+        name: data['name'],
+        phoneNumber: data['phoneNumber'],
+      );
+    }).toList();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/doctor.dart'; // Import your Doctor model
+import 'package:dental_clinic/screens/customer/dynamic_pages/update_appointment.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
 import 'package:flutter/material.dart';
@@ -224,8 +225,16 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                           leading: const Icon(Icons.edit),
                                           title: const Text('Update'),
                                           onTap: () {
-                                            // Update appointment
-                                            Navigator.pop(context);
+                                            // Navigate to the update appointment page
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    UpdateAppointmentPage(
+                                                        appointment:
+                                                            appointment),
+                                              ),
+                                            );
                                             // Navigate to the update appointment page
                                           },
                                         ),
@@ -233,9 +242,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                           leading: Icon(Icons.delete),
                                           title: Text('Delete'),
                                           onTap: () {
-                                            // Delete appointment
-                                            dbService.deleteAppointment(
-                                                appointment.id);
+                                            // Update appointment
                                             Navigator.pop(context);
                                           },
                                         ),

@@ -10,6 +10,9 @@ class Appointment {
   final String paymentMethod;
   final DateTime bookingTime;
   final String billedAmount;
+  final String userMode;
+  final String? name;
+  final String? phoneNumber;
 
   Appointment({
     required this.id,
@@ -21,6 +24,9 @@ class Appointment {
     required this.paymentMethod,
     required this.bookingTime,
     this.billedAmount = '0.0',
+    this.userMode = 'Online',
+    this.name,
+    this.phoneNumber,
   });
 
   factory Appointment.fromFirestore(DocumentSnapshot doc) {
@@ -36,6 +42,9 @@ class Appointment {
       bookingTime:
           (data['bookingTime'] as Timestamp?)?.toDate() ?? DateTime(1970, 1, 1),
       billedAmount: data['billedAmount'] as String,
+      userMode: data['userMode'] as String,
+      name: data['name'] as String?,
+      phoneNumber: data['phoneNumber'] as String?,
     );
   }
 }
