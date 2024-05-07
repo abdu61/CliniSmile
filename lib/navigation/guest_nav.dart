@@ -1,6 +1,6 @@
-import 'package:dental_clinic/screens/guest/guest_appointment.dart';
-import 'package:dental_clinic/screens/guest/guest_feed.dart';
-import 'package:dental_clinic/screens/guest/guest_home.dart';
+import 'package:dental_clinic/screens/customer/feed.dart';
+import 'package:dental_clinic/screens/customer/home.dart';
+import 'package:dental_clinic/screens/guest/guest_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -55,8 +55,8 @@ class NavigationController extends GetxController {
 
   // Define the screens for each navigation destination
   final screens = [
-    GuestHome(),
-    GuestAppointment(),
-    GuestFeed(),
+    Home(),
+    Feed(),
+    GuestProfile(),
   ];
 }

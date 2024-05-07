@@ -163,7 +163,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
         // Show a success message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Appointment booked successfully!')),
+          const SnackBar(content: Text('Appointment booked successfully!')),
         );
 
         // Navigate back to the previous page

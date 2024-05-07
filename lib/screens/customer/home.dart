@@ -27,12 +27,24 @@ class _HomeState extends State<Home> {
   bool loading = false;
   late Future<String> userName;
   String? userId;
+  late Future<DocumentSnapshot> userData;
+  String? userNamee;
+  String? userRole;
 
   @override
   void initState() {
     super.initState();
     userName = getUserName();
     userId = _firebaseAuth.currentUser?.uid;
+    final DatabaseService db =
+        DatabaseService(uid: _firebaseAuth.currentUser?.uid ?? '');
+    userData = db.getUserData();
+    userData.then((docSnapshot) {
+      Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+      userNamee = data['name'];
+      userRole = data['role'];
+      print(userRole);
+    });
   }
 
   Future<String> getUserName() async {
@@ -44,25 +56,44 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return loading
-        ? const Loading() // Show Loading widget when logging out
-        : SafeArea(
-            child: Scaffold(
-              appBar: MyAppBar(userName: userName),
-              body: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-                child: Column(
-                  children: [
-                    _MyAppointment(userId: userId ?? ''),
-                    const SizedBox(height: 10),
-                    _DoctorCategory(),
-                    const SizedBox(height: 10),
-                    _Doctors(userId: userId),
-                  ],
-                ),
-              ),
-            ),
-          );
+    return FutureBuilder<DocumentSnapshot>(
+      future: userData,
+      builder:
+          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Loading();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          Map<String, dynamic> data =
+              snapshot.data!.data() as Map<String, dynamic>;
+          userRole = data['role'];
+          return loading
+              ? const Loading() // Show Loading widget when logging out
+              : SafeArea(
+                  child: Scaffold(
+                    appBar: MyAppBar(userName: userName),
+                    body: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+                      child: Column(
+                        children: [
+                          userRole == 'guest'
+                              ? const SizedBox()
+                              : _MyAppointment(userId: userId ?? ''),
+                          const SizedBox(height: 10),
+                          _DoctorCategory(),
+                          const SizedBox(height: 10),
+                          userRole == 'guest'
+                              ? _Doctors(userId: userId, userRole: userRole)
+                              : _Doctors(userId: userId),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+        }
+      },
+    );
   }
 }
 
@@ -351,8 +382,9 @@ class _DoctorCategory extends StatelessWidget {
 // Top Doctors
 class _Doctors extends StatelessWidget {
   final String? userId;
+  String? userRole;
 
-  const _Doctors({Key? key, this.userId}) : super(key: key);
+  _Doctors({Key? key, this.userId, this.userRole}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -391,7 +423,9 @@ class _Doctors extends StatelessWidget {
                 itemCount: snapshot.hasData ? snapshot.data!.length : 0,
                 itemBuilder: (context, index) {
                   return DoctorListTile(
-                      doctor: snapshot.data![index], userId: userId ?? '');
+                      doctor: snapshot.data![index],
+                      userId: userId ?? '',
+                      userRole: userRole ?? '');
                 },
               ),
             ],

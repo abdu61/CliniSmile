@@ -203,10 +203,8 @@ class _StaffAppointmentState extends State<StaffAppointment> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.add), // Add an 'Add' icon
-                      SizedBox(
-                          width:
-                              14), // Add some spacing between the icon and the text
+                      Icon(Icons.add),
+                      SizedBox(width: 14),
                       Text(
                         'Add Appointment',
                         style: TextStyle(

@@ -3,14 +3,16 @@ import 'package:dental_clinic/screens/customer/dynamic_pages/doctor_details.dart
 import 'package:flutter/material.dart';
 
 class DoctorListTile extends StatelessWidget {
-  const DoctorListTile({
+  DoctorListTile({
     super.key,
     required this.doctor,
     required this.userId,
+    this.userRole,
   });
 
   final Doctor doctor;
   final String userId;
+  String? userRole;
 
   @override
   Widget build(BuildContext context) {
@@ -83,8 +85,8 @@ class DoctorListTile extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    DoctorDetailsPage(doctor: doctor, userId: userId),
+                builder: (context) => DoctorDetailsPage(
+                    doctor: doctor, userId: userId, userRole: userRole ?? ''),
               ),
             );
           },

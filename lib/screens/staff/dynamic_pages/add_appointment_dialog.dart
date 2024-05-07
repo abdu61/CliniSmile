@@ -4,8 +4,6 @@ import 'package:dental_clinic/screens/customer/dynamic_pages/book_appointment_pi
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/constant.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 class AddAppointmentDialog extends StatefulWidget {
   final DatabaseService databaseService;
