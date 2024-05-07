@@ -5,7 +5,8 @@ import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/widgets/DateTime%20pickers/date_selector.dart';
 import 'package:dental_clinic/shared/widgets/DateTime%20pickers/time_selector.dart';
 import 'package:dental_clinic/shared/widgets/cards/doctor_card.dart';
-import 'package:dental_clinic/shared/widgets/core.dart/bottom_navbar_button.dart';
+import 'package:dental_clinic/shared/widgets/coreComponents/app_bar.dart';
+import 'package:dental_clinic/shared/widgets/coreComponents/bottom_navbar_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -255,13 +256,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         : [];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Book Appointment',
-          style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color.fromARGB(255, 220, 227, 255),
-      ),
+      appBar: SimpleAppBar(title: 'Book Appointment'),
       body: SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(

@@ -3,7 +3,6 @@ import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/models/feed.dart';
 import 'package:dental_clinic/models/appointment.dart';
-import 'package:flutter/material.dart';
 
 class DatabaseService {
   final String uid;

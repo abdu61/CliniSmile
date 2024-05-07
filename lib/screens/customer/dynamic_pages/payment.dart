@@ -1,4 +1,5 @@
-import 'package:dental_clinic/shared/widgets/core.dart/bottom_navbar_button.dart';
+import 'package:dental_clinic/shared/widgets/coreComponents/app_bar.dart';
+import 'package:dental_clinic/shared/widgets/coreComponents/bottom_navbar_button.dart';
 import 'package:flutter/material.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,14 +26,13 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> _pay() async {
     if (_formKey.currentState!.validate()) {
       // TODO: Validate the payment information
-
       // TODO: Process the payment
 
       // If the payment is successful, book the appointment
       final start = DateTime(widget.date.year, widget.date.month,
           widget.date.day, widget.time.hour, widget.time.minute);
-      final end = start.add(
-          Duration(minutes: 30)); // Assuming each appointment lasts 30 minutes
+      // Assuming each appointment lasts 30 minutes
+      final end = start.add(Duration(minutes: 30));
 
       // Check if the slot is already booked
       final snapshot = await _appointmentsCollection
@@ -109,13 +109,7 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Payment',
-          style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color.fromARGB(255, 220, 227, 255),
-      ),
+      appBar: SimpleAppBar(title: 'Payment'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
