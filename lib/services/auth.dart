@@ -53,6 +53,32 @@ class AuthService {
     }
   }
 
+  //register with email and password - staff
+  Future<String> registerStaff(
+      String name, String email, String phone, String password) async {
+    try {
+      FirebaseAuth authStaff = FirebaseAuth.instance;
+
+      final userCredential = await authStaff.createUserWithEmailAndPassword(
+          email: email, password: password);
+      final user = userCredential.user;
+
+      // Create a new document for the user with the role 'staff'
+      await DatabaseService(uid: user!.uid)
+          .updateUserData(name, email, phone, 'staff');
+
+      // Sign out the newly created user
+      await authStaff.signOut();
+
+      return 'Success';
+    } on FirebaseAuthException catch (e) {
+      // Handle errors (optional)
+      print(e.code);
+      print(e.message);
+      return 'Error: ${e.message}';
+    }
+  }
+
 // Get user role
   Future<String> getUserRole(String uid) async {
     final userData = await DatabaseService(uid: uid).getUserData();
