@@ -1,7 +1,8 @@
+import 'package:dental_clinic/screens/admin/admin_doctors.dart';
 import 'package:dental_clinic/screens/admin/admin_home.dart';
 import 'package:dental_clinic/screens/admin/admin_expenses.dart';
-import 'package:dental_clinic/screens/admin/manage_staff.dart';
-import 'package:dental_clinic/screens/admin/manage_users.dart';
+import 'package:dental_clinic/screens/admin/admin_manage_staff.dart';
+import 'package:dental_clinic/screens/admin/admin_manage_users.dart';
 import 'package:dental_clinic/screens/staff/staff_appointment.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
@@ -133,6 +134,17 @@ class _AdminNavState extends State<AdminNav> {
                       ),
                     ),
                     NavigationRailDestination(
+                      icon:
+                          Icon(Icons.medical_information_outlined, size: 26.0),
+                      label: Text(
+                        'Doctors',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    NavigationRailDestination(
                       icon: Icon(Icons.people_outlined, size: 26.0), // new icon
                       label: Text(
                         'Users',
@@ -176,6 +188,7 @@ class AdminNavigationController extends GetxController {
     (auth, db) => AdminHome(authService: auth, databaseService: db),
     (auth, db) => StaffAppointment(authService: auth, databaseService: db),
     (auth, db) => AdminExpenses(authService: auth, databaseService: db),
+    (auth, db) => ManageDoctors(authService: auth, databaseService: db),
     (auth, db) => ManageUsers(authService: auth, databaseService: db),
     (auth, db) => ManageStaff(authService: auth, databaseService: db),
   ];
