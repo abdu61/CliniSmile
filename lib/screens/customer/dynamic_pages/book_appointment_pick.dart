@@ -29,56 +29,34 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   TimeOfDay? _time;
   bool _dateSelected = false;
   List<TimeOfDay> _bookedTimes = [];
-  // Add a new variable to keep track of the selected month
   DateTime _selectedMonth = DateTime.now();
-
-  // Add your database service instance
   final DatabaseService _databaseService = DatabaseService(uid: 'uid');
 
+  // Converts weekday number to string
   String _weekdayToString(int weekday) {
-    switch (weekday) {
-      case 1:
-        return 'Monday';
-      case 2:
-        return 'Tuesday';
-      case 3:
-        return 'Wednesday';
-      case 4:
-        return 'Thursday';
-      case 5:
-        return 'Friday';
-      case 6:
-        return 'Saturday';
-      case 7:
-        return 'Sunday';
-      default:
-        throw Exception('Invalid weekday: $weekday');
-    }
+    List<String> weekdays = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    return weekdays[weekday - 1];
   }
 
+  // Parses time from string to TimeOfDay
   TimeOfDay _parseTime(String time) {
     final split = time.split(':');
-    if (split.length != 2) {
-      throw FormatException(
-          'Invalid time format. Expected "HH:mm", got "$time"');
-    }
-    try {
-      return TimeOfDay(hour: int.parse(split[0]), minute: int.parse(split[1]));
-    } catch (e) {
-      throw FormatException(
-          'Invalid time format. Expected "HH:mm", got "$time"');
-    }
+    return TimeOfDay(hour: int.parse(split[0]), minute: int.parse(split[1]));
   }
 
+  // Generates available time slots
   List<TimeOfDay> _generateTimeSlots(
       List<String>? workingHours, List<String>? breakHours) {
-    if (workingHours == null || workingHours.isEmpty) {
+    if (workingHours == null || workingHours.length != 2) {
       return <TimeOfDay>[]; // Return an empty list if the doctor is not available
-    }
-
-    // Ensure there are exactly two elements in workingHours before proceeding
-    if (workingHours.length != 2) {
-      return <TimeOfDay>[]; // Return an empty list if workingHours does not contain exactly two elements
     }
 
     final startTime = _parseTime(workingHours[0]);
@@ -88,7 +66,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     final endMinutes = endTime.hour * 60 + endTime.minute;
 
     final timeSlots = <TimeOfDay>[];
-    final i = 0;
 
     TimeOfDay? breakStartTime;
     TimeOfDay? breakEndTime;
