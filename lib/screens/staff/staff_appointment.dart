@@ -45,8 +45,10 @@ class _StaffAppointmentState extends State<StaffAppointment> {
     appointments = await widget.databaseService.getAppointmentsByDate(_date);
     appointments.sort((a, b) =>
         a.start.compareTo(b.start)); // Sort appointments by start time
+
     // Get a list of all unique doctor IDs
     var doctorIds = appointments.map((a) => a.doctorId).toSet().toList();
+
     // Fetch doctor details for each unique doctor ID
     for (var doctorId in doctorIds) {
       try {
@@ -56,24 +58,24 @@ class _StaffAppointmentState extends State<StaffAppointment> {
         print('Failed to fetch doctor details: $e');
       }
     }
+
     // Get a list of all unique user IDs
     var userIds = appointments.map((a) => a.userId).toSet().toList();
+
     // Fetch user details for each unique user ID
     for (var userId in userIds) {
-      if (userId.isEmpty) {
-        // If userId is empty, use the name field from the Appointment object
-        var appointment = appointments.firstWhere((a) => a.userId == userId);
-        userDetails[userId] = appointment.name;
-      } else {
-        try {
-          DocumentSnapshot userDoc =
-              await widget.databaseService.getUserById(userId);
-          String userName = (userDoc.data() as Map<String, dynamic>)?['name'] ??
-              'Unknown'; // Get the user's name
-          userDetails[userId] =
-              userName; // Assign the user's name to userDetails[userId]
-        } catch (e) {
-          print('Failed to fetch user details: $e');
+      try {
+        DocumentSnapshot userDoc =
+            await widget.databaseService.getUserById(userId);
+        String userName = (userDoc.data() as Map<String, dynamic>)?['name'] ??
+            'Unknown'; // Get the user's name
+        userDetails[userId] =
+            userName; // Assign the user's name to userDetails[userId]
+      } catch (e) {
+        print('Failed to fetch user details: $e');
+        // If failed to fetch user details, use the name field from the Appointment object
+        for (var appointment in appointments.where((a) => a.userId == userId)) {
+          userDetails[userId] = appointment.name;
         }
       }
     }
@@ -178,7 +180,8 @@ class _StaffAppointmentState extends State<StaffAppointment> {
                           onAddAppointment: (appointment) async {
                             await widget.databaseService
                                 .addAppointment(appointment);
-                            fetchAppointments();
+                            await fetchAppointments();
+                            setState(() {});
                           },
                         );
                       },
@@ -308,6 +311,18 @@ class _StaffAppointmentState extends State<StaffAppointment> {
                                             .bold, // Adjust the font weight
                                       ),
                                     ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
+                                    onPressed: () async {
+                                      await widget.databaseService
+                                          .deleteAppointmentById(
+                                              appointments[index].id);
+                                      setState(() {
+                                        fetchAppointments();
+                                      });
+                                    },
                                   ),
                                 ],
                               ),

@@ -267,7 +267,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                       onPressed: () async {
                                                         try {
                                                           await dbService
-                                                              .deleteAppointment(
+                                                              .deleteAppointmentById(
                                                                   appointment
                                                                       .id);
                                                           f(mounted) {

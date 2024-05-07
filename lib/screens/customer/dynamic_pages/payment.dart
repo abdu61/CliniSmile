@@ -49,7 +49,7 @@ class _PaymentPageState extends State<PaymentPage> {
           'status': 'Open',
           'paymentMethod': _paymentMethod,
           'bookingTime': DateTime.now(),
-          'billedAmount': '5.0',
+          'consultationFee': 5.0,
           'userMode': 'Online',
         });
 

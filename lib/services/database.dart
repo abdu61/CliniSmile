@@ -10,7 +10,7 @@ class DatabaseService {
   DatabaseService({required this.uid});
 
   // collection reference
-  final CollectionReference userCollection =
+  final CollectionReference _userCollection =
       FirebaseFirestore.instance.collection('users');
   final CollectionReference _categoriesCollection =
       FirebaseFirestore.instance.collection('categories');
@@ -27,7 +27,7 @@ class DatabaseService {
       throw Exception('Phone number must be 8 digits long');
     }
 
-    return await userCollection.doc(uid).set({
+    return await _userCollection.doc(uid).set({
       'name': name,
       'email': email,
       'phone': phone,
@@ -36,15 +36,23 @@ class DatabaseService {
   }
 
   Future<DocumentSnapshot> getUserData() async {
-    return await userCollection.doc(uid).get();
+    return await _userCollection.doc(uid).get();
   }
 
   Future<DocumentSnapshot> getUserById(String id) async {
-    return await userCollection.doc(id).get();
+    return await _userCollection.doc(id).get();
+  }
+
+  Future<QuerySnapshot> getUsersByRole(String role) async {
+    return await _userCollection.where('role', isEqualTo: role).get();
   }
 
   Future<void> deleteUserData() async {
-    return await userCollection.doc(uid).delete();
+    return await _userCollection.doc(uid).delete();
+  }
+
+  Future<void> deleteUserById(String id) async {
+    return await _userCollection.doc(id).delete();
   }
 
   //Doctor Categories
@@ -292,7 +300,7 @@ class DatabaseService {
       'status': appointment.status,
       'paymentMethod': appointment.paymentMethod,
       'bookingTime': appointment.bookingTime,
-      'billedAmount': appointment.billedAmount,
+      'consultationFee': appointment.consultationFee,
       'userMode': appointment.userMode,
       'name': appointment.name,
       'phoneNumber': appointment.phoneNumber,
@@ -315,7 +323,7 @@ class DatabaseService {
         status: data['status'] ?? 'pending',
         paymentMethod: data['paymentMethod'] ?? '',
         bookingTime: (data['bookingTime'] as Timestamp).toDate(),
-        billedAmount: data['billedAmount'] ?? '0.0',
+        consultationFee: (data['billedAmount'] as num?)?.toDouble() ?? 0.0,
         userMode: data['userMode'] ?? 'Online',
         name: data['name'],
         phoneNumber: data['phoneNumber'],
@@ -332,7 +340,7 @@ class DatabaseService {
       'status': appointment.status,
       'paymentMethod': appointment.paymentMethod,
       'bookingTime': appointment.bookingTime,
-      'billedAmount': appointment.billedAmount,
+      'consultationFee': appointment.consultationFee,
       'userMode': appointment.userMode,
       'name': appointment.name,
       'phoneNumber': appointment.phoneNumber,
@@ -363,7 +371,7 @@ class DatabaseService {
         status: data['status'] ?? 'pending',
         paymentMethod: data['paymentMethod'] ?? '',
         bookingTime: (data['bookingTime'] as Timestamp).toDate(),
-        billedAmount: data['billedAmount'] ?? '0.0',
+        consultationFee: (data['billedAmount'] as num?)?.toDouble() ?? 0.0,
         userMode: data['userMode'] ?? 'Online',
         name: data['name'],
         phoneNumber: data['phoneNumber'],
@@ -371,8 +379,12 @@ class DatabaseService {
     }).toList();
   }
 
-  Future<void> deleteAppointment(String id) {
+  Future<void> deleteAppointmentById(String id) {
     return _appointmentsCollection.doc(id).delete();
+  }
+
+  Future<void> deleteAppointment(Appointment appointment) {
+    return _appointmentsCollection.doc(appointment.id).delete();
   }
 
   Stream<QuerySnapshot> getAppointmentsByUserid(String userId) {
@@ -396,7 +408,7 @@ class DatabaseService {
         status: data['status'] ?? 'pending',
         paymentMethod: data['paymentMethod'] ?? '',
         bookingTime: (data['bookingTime'] as Timestamp).toDate(),
-        billedAmount: data['billedAmount'] ?? '0.0',
+        consultationFee: (data['billedAmount'] as num?)?.toDouble() ?? 0.0,
         userMode: data['userMode'] ?? 'Online',
         name: data['name'],
         phoneNumber: data['phoneNumber'],
@@ -426,7 +438,7 @@ class DatabaseService {
         status: data['status'] ?? 'pending',
         paymentMethod: data['paymentMethod'] ?? '',
         bookingTime: (data['bookingTime'] as Timestamp).toDate(),
-        billedAmount: data['billedAmount'] ?? '0.0',
+        consultationFee: (data['billedAmount'] as num?)?.toDouble() ?? 0.0,
         userMode: data['userMode'] ?? 'Online',
         name: data['name'],
         phoneNumber: data['phoneNumber'],

@@ -87,6 +87,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     final endMinutes = endTime.hour * 60 + endTime.minute;
 
     final timeSlots = <TimeOfDay>[];
+    final i = 0;
 
     TimeOfDay? breakStartTime;
     TimeOfDay? breakEndTime;
@@ -150,7 +151,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         status: 'Open',
         paymentMethod: '', // Set this to the appropriate value
         bookingTime: DateTime.now(),
-        billedAmount: '', // Set this to the appropriate value
+        consultationFee: 0.0, // Set this to the appropriate value
         userMode: 'Offline',
         name: widget.name,
         phoneNumber: widget.phoneNumber,
