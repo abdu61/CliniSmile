@@ -270,7 +270,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                               .deleteAppointmentById(
                                                                   appointment
                                                                       .id);
-                                                          f(mounted) {
+                                                          if (mounted) {
                                                             Navigator.of(
                                                                     context)
                                                                 .pop(); // Close the dialog

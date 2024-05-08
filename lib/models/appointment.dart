@@ -42,10 +42,10 @@ class Appointment {
 
   factory Appointment.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    var serviceList = data['services'] as List;
+    var serviceList = (data['services'] as List?) ?? [];
     List<Service> services =
         serviceList.map((i) => Service.fromFirestore(i)).toList();
-    var chargeList = data['otherCharges'] as List;
+    var chargeList = (data['otherCharges'] as List?) ?? [];
     List<Charge> otherCharges =
         chargeList.map((i) => Charge.fromFirestore(i)).toList();
 
@@ -67,7 +67,7 @@ class Appointment {
       tax: (data['tax'] as num?)?.toDouble() ?? 0.0,
       totalAmount: (data['totalAmount'] as num?)?.toDouble() ?? 0.0,
       otherCharges: otherCharges,
-      billedStatus: data['billedStatus'] as String,
+      billedStatus: data['billedStatus'] as String? ?? 'Unbilled',
     );
   }
 

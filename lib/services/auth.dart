@@ -10,6 +10,8 @@ class AuthService {
     return Users(uid: firebaseUser.uid);
   }
 
+  User? get currentUser => _auth.currentUser;
+
   //Auth Change user stream
   Stream<Users?> get user {
     return _auth

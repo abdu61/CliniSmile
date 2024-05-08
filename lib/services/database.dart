@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dental_clinic/models/categories.dart';
+import 'package:dental_clinic/models/chat.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/models/feed.dart';
 import 'package:dental_clinic/models/appointment.dart';
@@ -22,6 +23,12 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('appointments');
   final CollectionReference _servicesCollection =
       FirebaseFirestore.instance.collection('services');
+  final CollectionReference _chatsCollection =
+      FirebaseFirestore.instance.collection('chats');
+
+  CollectionReference collection(String path) {
+    return FirebaseFirestore.instance.collection(path);
+  }
 
   Future<void> updateUserData(
       String name, String email, String phone, String role) async {
@@ -482,5 +489,52 @@ class DatabaseService {
       name: data['name'] ?? 'No name',
       price: data['price'] ?? 0.0,
     );
+  }
+
+  //chat
+// Method to send a message
+  Future<void> sendMessage(String staffId, ChatMessage message) async {
+    var chatDocRef = _chatsCollection.doc('${uid}_$staffId');
+    var chatDoc = await chatDocRef.get();
+
+    if (!chatDoc.exists) {
+      await chatDocRef.set({}); // create the document if it doesn't exist
+    } else {
+      chatDoc = await chatDocRef.get(); // only read the document if it exists
+    }
+
+    // Ensure the 'messages' subcollection exists
+    var messagesCollectionRef = chatDocRef.collection('messages');
+    var messagesDoc = await messagesCollectionRef.doc(message.id).get();
+
+    if (!messagesDoc.exists) {
+      await messagesCollectionRef
+          .doc(message.id)
+          .set(message.toDocument()); // create the document if it doesn't exist
+    } else {
+      await messagesCollectionRef
+          .doc(message.id)
+          .update(message.toDocument()); // update the document if it exists
+    }
+  }
+
+  // Method to get chat messages
+  Stream<List<ChatMessage>> getChatMessages(String staffId) {
+    return _chatsCollection
+        .doc('${uid}_$staffId')
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) {
+              if (doc.exists) {
+                return ChatMessage.fromDocument(doc);
+              } else {
+                return null;
+              }
+            })
+            .where((message) => message != null)
+            .toList()
+            .cast<ChatMessage>());
   }
 }

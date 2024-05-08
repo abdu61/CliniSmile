@@ -6,16 +6,13 @@ class Service {
   final double price;
 
   Service({
-    required this.id,
+    this.id = '',
     required this.name,
     required this.price,
   });
 
-  factory Service.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
+  factory Service.fromFirestore(Map<String, dynamic> data) {
     return Service(
-      id: doc.id,
       name: data['name'] as String,
       price: (data['price'] as num).toDouble(),
     );

@@ -1,5 +1,5 @@
 import 'package:dental_clinic/screens/staff/staff_appointment.dart';
-import 'package:dental_clinic/screens/staff/staff_chat.dart';
+import 'package:dental_clinic/screens/staff/staff_chat_list_ui.dart';
 import 'package:dental_clinic/screens/staff/staff_home.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
@@ -109,8 +109,10 @@ class StaffNavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
   final screens = [
-    (auth, db) => StaffHome(authService: auth, databaseService: db),
-    (auth, db) => StaffAppointment(authService: auth, databaseService: db),
-    (auth, db) => StaffChat(authService: auth, databaseService: db),
+    (AuthService auth, DatabaseService db) =>
+        StaffHome(authService: auth, databaseService: db),
+    (AuthService auth, DatabaseService db) =>
+        StaffAppointment(authService: auth, databaseService: db),
+    (AuthService auth, DatabaseService db) => StaffChatListUI(),
   ];
 }
