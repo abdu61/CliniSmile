@@ -127,7 +127,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 _date.year, _date.month, _date.day, _time!.hour, _time!.minute)
             .add(Duration(minutes: 30)),
         status: 'Open',
-        paymentMethod: '', // Set this to the appropriate value
+        paymentMethod: 'Cash', // Set this to the appropriate value
         bookingTime: DateTime.now(),
         consultationFee: 0.0, // Set this to the appropriate value
         userMode: 'Offline',
@@ -164,8 +164,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     // Calculate the number of days in the selected month
     final daysInMonth =
         DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;

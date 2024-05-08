@@ -19,7 +19,8 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   final _formKey = GlobalKey<FormState>();
-  String _paymentMethod = 'Debit';
+  String? _paymentMethod;
+  double _consultationFee = 0.0;
   final _appointmentsCollection =
       FirebaseFirestore.instance.collection('appointments');
 
@@ -32,7 +33,7 @@ class _PaymentPageState extends State<PaymentPage> {
       final start = DateTime(widget.date.year, widget.date.month,
           widget.date.day, widget.time.hour, widget.time.minute);
       // Assuming each appointment lasts 30 minutes
-      final end = start.add(Duration(minutes: 30));
+      final end = start.add(const Duration(minutes: 30));
 
       // Check if the slot is already booked
       final snapshot = await _appointmentsCollection
@@ -49,7 +50,7 @@ class _PaymentPageState extends State<PaymentPage> {
           'status': 'Open',
           'paymentMethod': _paymentMethod,
           'bookingTime': DateTime.now(),
-          'consultationFee': 5.0,
+          'consultationFee': _consultationFee,
           'userMode': 'Online',
         });
 
@@ -111,44 +112,64 @@ class _PaymentPageState extends State<PaymentPage> {
     return Scaffold(
       appBar: SimpleAppBar(title: 'Payment'),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(28.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               // Payment method field
-              DropdownButtonFormField<String>(
-                value: _paymentMethod,
-                items: ['Debit', 'Credit'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _paymentMethod = newValue!;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select a payment method';
-                  }
-                  return null;
-                },
+              Center(
+                child: ToggleButtons(
+                  isSelected: [
+                    _paymentMethod == 'Card',
+                    _paymentMethod == 'Cash'
+                  ],
+                  onPressed: (int index) {
+                    setState(() {
+                      _paymentMethod = index == 0 ? 'Card' : 'Cash';
+                      _consultationFee = _paymentMethod == 'Card' ? 5.0 : 0.0;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: const Color.fromARGB(255, 0, 0, 0), // Default color
+                  selectedColor: Colors.white,
+                  fillColor: const Color.fromARGB(255, 126, 156, 252),
+                  borderColor: const Color.fromARGB(255, 126, 156, 252),
+                  selectedBorderColor: const Color.fromARGB(255, 126, 156, 252),
+                  children: const <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(50.0),
+                      child: Text('Card',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18.0)),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(50.0),
+                      child: Text('Cash',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18.0)),
+                    ),
+                  ], // Selected border color
+                ),
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 40.0),
               Text(
-                'Consultation Fee: BD 5.0',
-                style: textTheme.titleMedium,
-              ),
+                  _paymentMethod == 'Cash'
+                      ? 'Payment to be made in Clinic'
+                      : 'Consultation Fee: BD $_consultationFee',
+                  style: TextStyle(
+                      color: _paymentMethod == 'Cash'
+                          ? const Color.fromARGB(255, 238, 86, 76)
+                          : Colors.black,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600)),
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNavBarButtons(
-        isEnabled: true,
-        onPressed: _pay,
+        isEnabled: _paymentMethod != null,
+        onPressed: _paymentMethod != null ? () => _pay() : () {},
         buttonText: 'Pay',
       ),
     );
