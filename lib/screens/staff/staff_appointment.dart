@@ -1,6 +1,7 @@
 import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/screens/staff/dynamic_pages/add_appointment_dialog.dart';
+import 'package:dental_clinic/screens/staff/staff_billing_page.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
@@ -34,6 +35,7 @@ class _StaffAppointmentState extends State<StaffAppointment> {
   Map<String, String?> userDetails = {};
   List<Doctor> doctors = [];
   String selectedDoctorId = '';
+  String billedStatus = '';
 
   @override
   void initState() {
@@ -64,18 +66,22 @@ class _StaffAppointmentState extends State<StaffAppointment> {
 
     // Fetch user details for each unique user ID
     for (var userId in userIds) {
-      try {
-        DocumentSnapshot userDoc =
-            await widget.databaseService.getUserById(userId);
-        String userName = (userDoc.data() as Map<String, dynamic>)?['name'] ??
-            'Unknown'; // Get the user's name
-        userDetails[userId] =
-            userName; // Assign the user's name to userDetails[userId]
-      } catch (e) {
-        print('Failed to fetch user details: $e');
-        // If failed to fetch user details, use the name field from the Appointment object
-        for (var appointment in appointments.where((a) => a.userId == userId)) {
-          userDetails[userId] = appointment.name;
+      if (userId != null) {
+        // Check if userId is not null
+        try {
+          DocumentSnapshot userDoc =
+              await widget.databaseService.getUserById(userId);
+          String userName = (userDoc.data() as Map<String, dynamic>)?['name'] ??
+              'Unknown'; // Get the user's name
+          userDetails[userId] =
+              userName; // Assign the user's name to userDetails[userId]
+        } catch (e) {
+          print('Failed to fetch user details: $e');
+          // If failed to fetch user details, use the name field from the Appointment object
+          for (var appointment
+              in appointments.where((a) => a.userId == userId)) {
+            userDetails[userId] = appointment.name;
+          }
         }
       }
     }
@@ -277,9 +283,31 @@ class _StaffAppointmentState extends State<StaffAppointment> {
                                         fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(width: 20.0),
+                                  Text(
+                                    'Status: ${appointments[index].billedStatus}',
+                                    style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            appointments[index].billedStatus ==
+                                                    'Paid'
+                                                ? Colors.green
+                                                : Colors.red),
+                                  ),
+                                  const SizedBox(width: 20.0),
                                   ElevatedButton(
                                     onPressed: () {
-                                      // TODO: Implement billing functionality here
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              StaffBillingPage(
+                                            appointment: appointments[index],
+                                            databaseService:
+                                                widget.databaseService,
+                                          ),
+                                        ),
+                                      );
                                     },
                                     style: ButtonStyle(
                                       backgroundColor:

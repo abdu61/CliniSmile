@@ -3,6 +3,7 @@ import 'package:dental_clinic/models/categories.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/models/feed.dart';
 import 'package:dental_clinic/models/appointment.dart';
+import 'package:dental_clinic/models/services.dart';
 
 class DatabaseService {
   final String uid;
@@ -19,6 +20,8 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('feedItems');
   final CollectionReference _appointmentsCollection =
       FirebaseFirestore.instance.collection('appointments');
+  final CollectionReference _servicesCollection =
+      FirebaseFirestore.instance.collection('services');
 
   Future<void> updateUserData(
       String name, String email, String phone, String role) async {
@@ -343,6 +346,13 @@ class DatabaseService {
       'userMode': appointment.userMode,
       'name': appointment.name,
       'phoneNumber': appointment.phoneNumber,
+      'services':
+          appointment.services.map((service) => service.toMap()).toList(),
+      'tax': appointment.tax,
+      'totalAmount': appointment.totalAmount,
+      'billedStatus': appointment.billedStatus,
+      'otherCharges':
+          appointment.otherCharges.map((charge) => charge.toMap()).toList(),
     });
   }
 
@@ -411,6 +421,7 @@ class DatabaseService {
         userMode: data['userMode'] ?? 'Online',
         name: data['name'],
         phoneNumber: data['phoneNumber'],
+        billedStatus: data['billedStatus'] ?? 'Unbilled',
       );
     }).toList();
   }
@@ -441,7 +452,35 @@ class DatabaseService {
         userMode: data['userMode'] ?? 'Online',
         name: data['name'],
         phoneNumber: data['phoneNumber'],
+        billedStatus: data['billedStatus'] ?? 'Unpaid',
       );
     }).toList();
+  }
+
+  // Services
+  Future<List<Service>> getServices() async {
+    final snapshot = await _servicesCollection.get();
+    return snapshot.docs.map((doc) {
+      return Service(
+        id: doc.id,
+        name: doc['name'],
+        price: doc['price'],
+      );
+    }).toList();
+  }
+
+  Future<Service> getServiceById(String id) async {
+    final doc = await _servicesCollection.doc(id).get();
+
+    if (!doc.exists) {
+      throw Exception('No service found with ID: $id');
+    }
+
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Service(
+      id: doc.id,
+      name: data['name'] ?? 'No name',
+      price: data['price'] ?? 0.0,
+    );
   }
 }
