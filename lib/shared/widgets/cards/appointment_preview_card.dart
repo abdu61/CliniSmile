@@ -128,7 +128,7 @@ class AppointmentPreviewCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 14),
+                              const SizedBox(width: 6),
                               const Icon(Icons.access_time,
                                   color: Colors.white),
                               const SizedBox(width: 10),

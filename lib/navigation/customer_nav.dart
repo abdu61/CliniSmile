@@ -1,3 +1,4 @@
+import 'package:dental_clinic/models/user.dart';
 import 'package:dental_clinic/screens/customer/appointment.dart';
 import 'package:dental_clinic/screens/customer/chat.dart';
 import 'package:dental_clinic/screens/customer/feed.dart';
@@ -22,7 +23,12 @@ class CustomerNav extends StatelessWidget {
 
     return Scaffold(
       bottomNavigationBar: buildBottomNavigationBar(controller, pageController),
-      body: buildPageView(controller, pageController),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return buildPageView(controller, pageController);
+      }),
     );
   }
 
@@ -46,26 +52,13 @@ class CustomerNav extends StatelessWidget {
 
   List<NavigationDestination> buildNavigationDestinations() {
     return const [
+      NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
       NavigationDestination(
-        icon: Icon(Icons.home_outlined),
-        label: 'Home',
-      ),
+          icon: Icon(Icons.edit_calendar_outlined), label: 'Appointment'),
+      NavigationDestination(icon: Icon(Icons.feed_outlined), label: 'Feed'),
+      NavigationDestination(icon: Icon(Icons.chat_outlined), label: 'Chat'),
       NavigationDestination(
-        icon: Icon(Icons.edit_calendar_outlined),
-        label: 'Appointment',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.feed_outlined),
-        label: 'Feed',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.chat_outlined),
-        label: 'Chat',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.person_outline_rounded),
-        label: 'Profile',
-      ),
+          icon: Icon(Icons.person_outline_rounded), label: 'Profile'),
     ];
   }
 
@@ -87,6 +80,9 @@ class CustomerNavigationController extends GetxController
   final DatabaseService db;
   final Rx<int> selectedIndex = 0.obs;
   final List<Widget> screens;
+  final RxBool isLoading = false.obs;
+  final Rx<Users?> user =
+      Rx<Users?>(null); // Add a variable to store the user data
 
   CustomerNavigationController({required this.auth, required this.db})
       : screens = [
@@ -101,6 +97,7 @@ class CustomerNavigationController extends GetxController
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    preloadData();
   }
 
   @override
@@ -112,5 +109,43 @@ class CustomerNavigationController extends GetxController
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+  }
+
+  Future<void> preloadData() async {
+    isLoading.value = true;
+    // Preload data for each screen
+    await Future.wait([
+      _preloadHomeData(),
+      _preloadAppointmentData(),
+      _preloadFeedData(),
+      _preloadChatData(),
+      preloadProfileData(),
+    ]);
+    isLoading.value = false;
+  }
+
+  Future<void> _preloadHomeData() async {
+    // Add your data fetching logic here
+  }
+
+  Future<void> _preloadAppointmentData() async {
+    // Add your data fetching logic here
+  }
+
+  Future<void> _preloadFeedData() async {
+    // Add your data fetching logic here
+  }
+
+  Future<void> _preloadChatData() async {
+    // Add your data fetching logic here
+  }
+
+  Future<void> preloadProfileData() async {
+    try {
+      user.value = await db.getUserDetails(); // Fetch and store user details
+    } catch (e) {
+      // Handle errors if necessary
+      print('Failed to load user profile: $e');
+    }
   }
 }
