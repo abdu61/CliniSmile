@@ -1,15 +1,21 @@
 import 'package:dental_clinic/screens/customer/feed.dart';
 import 'package:dental_clinic/screens/customer/home.dart';
 import 'package:dental_clinic/screens/guest/guest_profile.dart';
+import 'package:dental_clinic/services/auth.dart';
+import 'package:dental_clinic/services/database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GuestNav extends StatelessWidget {
-  const GuestNav({Key? key}) : super(key: key);
+  final AuthService auth;
+  final DatabaseService db;
+
+  const GuestNav({Key? key, required this.auth, required this.db})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(NavigationController());
+    final controller = Get.put(NavigationController(auth: auth, db: db));
 
     return Scaffold(
       bottomNavigationBar: buildBottomNavigationBar(controller),
@@ -55,6 +61,12 @@ class GuestNav extends StatelessWidget {
 }
 
 class NavigationController extends GetxController {
+  final AuthService auth;
+  final DatabaseService db;
   final Rx<int> selectedIndex = 0.obs;
-  final screens = [Home(), Feed(), GuestProfile()];
+
+  NavigationController({required this.auth, required this.db})
+      : screens = [Home(auth: auth, db: db), Feed(), GuestProfile()];
+
+  final List<Widget> screens;
 }

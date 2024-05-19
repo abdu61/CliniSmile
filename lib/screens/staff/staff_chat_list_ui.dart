@@ -4,6 +4,10 @@ import 'package:dental_clinic/shared/loading.dart';
 import 'package:flutter/material.dart';
 
 class StaffChatListUI extends StatefulWidget {
+  final bool showChatUI;
+
+  StaffChatListUI({this.showChatUI = true});
+
   @override
   _StaffChatListUIState createState() => _StaffChatListUIState();
 }
@@ -76,19 +80,21 @@ class _StaffChatListUIState extends State<StaffChatListUI> {
               },
             ),
           ),
-          const VerticalDivider(width: 1.0),
-          Expanded(
-            flex: 3,
-            child: ValueListenableBuilder<String>(
-              valueListenable: activeChatUserId,
-              builder: (context, value, child) {
-                return value.isNotEmpty
-                    ? StaffChatUI(userId: value)
-                    : const Center(
-                        child: Text('Select a chat to start messaging'));
-              },
+          if (widget.showChatUI) ...[
+            const VerticalDivider(width: 1.0),
+            Expanded(
+              flex: 3,
+              child: ValueListenableBuilder<String>(
+                valueListenable: activeChatUserId,
+                builder: (context, value, child) {
+                  return value.isNotEmpty
+                      ? StaffChatUI(userId: value)
+                      : const Center(
+                          child: Text('Select a chat to start messaging'));
+                },
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

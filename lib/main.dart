@@ -1,13 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'package:dental_clinic/consts.dart';
 import 'package:dental_clinic/models/user.dart';
 import 'package:dental_clinic/screens/wrapper.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +18,7 @@ Future<void> main() async {
       storageBucket: 'dental-app-ab452.appspot.com',
     ),
   );
-  Gemini.init(apiKey: GEMINI_API_KEY);
+
   runApp(MyApp());
 }
 
@@ -40,12 +38,13 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'CliniSmile',
         theme: ThemeData(
           primaryColor: const Color(0xFF254EDB),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(
+              backgroundColor: Color.fromARGB(
                   255, 126, 156, 252), // Set the background color here
               padding: const EdgeInsets.all(5.0), // Add more padding here
               shape: RoundedRectangleBorder(

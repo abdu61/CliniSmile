@@ -18,42 +18,63 @@ class _StaffChatUIState extends State<StaffChatUI> {
   final ChatUser staffUser = ChatUser(id: "staffId", firstName: "User");
   final CollectionReference chatRef =
       FirebaseFirestore.instance.collection('chats');
+  final CollectionReference userRef =
+      FirebaseFirestore.instance.collection('users');
 
   List<ChatMessage> messages = [];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Chat with user ${widget.userId}'),
-        backgroundColor: const Color.fromARGB(255, 192, 192, 192),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: chatRef
-            .doc('${widget.userId}_staffId')
-            .collection('messages')
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            messages = snapshot.data!.docs.map((doc) {
-              var data = doc.data() as Map<String, dynamic>;
-              return ChatMessage(
-                user: data['sentBy'] == user.uid ? chatUser : staffUser,
-                createdAt: (data['timestamp'] as Timestamp).toDate(),
-                text: data['message'],
-              );
-            }).toList();
-            return DashChat(
-              currentUser: chatUser,
-              onSend: _handleSubmitted,
-              messages: messages,
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+    return FutureBuilder<DocumentSnapshot>(
+      future: userRef.doc(widget.userId).get(),
+      builder:
+          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return const Text("Something went wrong");
+        }
+
+        if (snapshot.connectionState == ConnectionState.done) {
+          Map<String, dynamic> data =
+              snapshot.data!.data() as Map<String, dynamic>;
+          String userName = data[
+              'name']; // Replace 'name' with the actual field name in your Firestore
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Chat with $userName'),
+              backgroundColor: const Color.fromARGB(255, 192, 192, 192),
+            ),
+            body: StreamBuilder<QuerySnapshot>(
+              stream: chatRef
+                  .doc('${widget.userId}_staffId')
+                  .collection('messages')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  messages = snapshot.data!.docs.map((doc) {
+                    var data = doc.data() as Map<String, dynamic>;
+                    return ChatMessage(
+                      user: data['sentBy'] == user.uid ? chatUser : staffUser,
+                      createdAt: (data['timestamp'] as Timestamp).toDate(),
+                      text: data['message'],
+                    );
+                  }).toList();
+                  return DashChat(
+                    currentUser: chatUser,
+                    onSend: _handleSubmitted,
+                    messages: messages,
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+          );
+        }
+
+        return const CircularProgressIndicator();
+      },
     );
   }
 

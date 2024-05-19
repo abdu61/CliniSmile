@@ -5,7 +5,9 @@ import 'package:dental_clinic/navigation/staff_nav.dart';
 import 'package:dental_clinic/screens/authenticate/authenticate.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/navigation/customer_nav.dart';
+import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
+import 'package:dental_clinic/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +23,8 @@ class Wrapper extends StatelessWidget {
     if (user == null) {
       return Authenticate();
     } else {
+      final dbService = DatabaseService(uid: user.uid);
+
       // Use FutureBuilder to handle the asynchronous getUserRole function
       return FutureBuilder<String>(
         future: authService.getUserRole(user.uid),
@@ -37,9 +41,11 @@ class Wrapper extends StatelessWidget {
               case 'staff':
                 return StaffNav();
               case 'Customer':
-                return CustomerNav();
+                return SplashScreen(
+                    nextScreen: CustomerNav(auth: authService, db: dbService));
               default: // 'guest' or any other role
-                return GuestNav();
+                return SplashScreen(
+                    nextScreen: GuestNav(auth: authService, db: dbService));
             }
           }
         },
@@ -47,3 +53,5 @@ class Wrapper extends StatelessWidget {
     }
   }
 }
+
+// I also need authenticate to use splashscreen as well. Just another headsup basically the authenticate page have login which serves Mobile and Desktop. i need to show only for Mobile

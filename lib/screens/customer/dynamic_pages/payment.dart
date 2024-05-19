@@ -27,7 +27,7 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> _pay() async {
     if (_formKey.currentState!.validate()) {
       // TODO: Validate the payment information
-      // TODO: Process the payment
+      // TODO: Process the payment - External Payment API
 
       // If the payment is successful, book the appointment
       final start = DateTime(widget.date.year, widget.date.month,

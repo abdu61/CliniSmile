@@ -19,7 +19,6 @@ class AuthService {
         .map((User? user) => user != null ? _userFromFirebaseUser(user) : null);
   }
 
-  // sign in anonymously
   Future<String?> signInAnon() async {
     try {
       final userCredential = await _auth.signInAnonymously();
@@ -27,7 +26,7 @@ class AuthService {
       if (user != null) {
         // Assign a default role to the guest user with sample data
         await DatabaseService(uid: user.uid).updateUserData(
-            'Guest User', 'guest@domain.com', '12345678', 'guest');
+            'Guest User', 'guest@domain.com', '12345678', 'guest', '');
         return _userFromFirebaseUser(user).uid;
       } else {
         return null;
@@ -55,7 +54,7 @@ class AuthService {
     }
   }
 
-  //register with email and password - staff
+//register with email and password - staff
   Future<String> registerStaff(
       String name, String email, String phone, String password) async {
     try {
@@ -67,7 +66,7 @@ class AuthService {
 
       // Create a new document for the user with the role 'staff'
       await DatabaseService(uid: user!.uid)
-          .updateUserData(name, email, phone, 'staff');
+          .updateUserData(name, email, phone, 'staff', '');
 
       // Sign out the newly created user
       await authStaff.signOut();
@@ -96,8 +95,8 @@ class AuthService {
       final user = userCredential.user;
 
       // Create a new document for the user with the role 'Customer'
-      await DatabaseService(uid: user!.uid)
-          .updateUserData(name, email, phone, 'Customer');
+      await DatabaseService(uid: user!.uid).updateUserData(name, email, phone,
+          'Customer', 'gs://dental-app-ab452.appspot.com/defaultProfile.jpg');
 
       return _userFromFirebaseUser(user);
     } on FirebaseAuthException catch (e) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_jap_icons/medical_icons_icons.dart';
 
 class CategoryCircle extends StatelessWidget {
   const CategoryCircle({

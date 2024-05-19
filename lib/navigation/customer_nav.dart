@@ -3,15 +3,21 @@ import 'package:dental_clinic/screens/customer/chat.dart';
 import 'package:dental_clinic/screens/customer/feed.dart';
 import 'package:dental_clinic/screens/customer/home.dart';
 import 'package:dental_clinic/screens/customer/profile.dart';
+import 'package:dental_clinic/services/auth.dart';
+import 'package:dental_clinic/services/database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CustomerNav extends StatelessWidget {
-  const CustomerNav({Key? key}) : super(key: key);
+  final AuthService auth;
+  final DatabaseService db;
+
+  const CustomerNav({super.key, required this.auth, required this.db});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CustomerNavigationController());
+    final controller =
+        Get.put(CustomerNavigationController(auth: auth, db: db));
     final pageController = PageController();
 
     return Scaffold(
@@ -77,8 +83,19 @@ class CustomerNav extends StatelessWidget {
 
 class CustomerNavigationController extends GetxController
     with WidgetsBindingObserver {
+  final AuthService auth;
+  final DatabaseService db;
   final Rx<int> selectedIndex = 0.obs;
-  final screens = [Home(), AppointmentPage(), Feed(), Chat(), Profile()];
+  final List<Widget> screens;
+
+  CustomerNavigationController({required this.auth, required this.db})
+      : screens = [
+          Home(auth: auth, db: db),
+          AppointmentPage(auth: auth, db: db),
+          Feed(),
+          Chat(auth: auth, db: db),
+          Profile(auth: auth, db: db),
+        ];
 
   @override
   void onInit() {

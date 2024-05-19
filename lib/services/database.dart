@@ -5,6 +5,7 @@ import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/models/feed.dart';
 import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/services.dart';
+import 'package:dental_clinic/models/user.dart';
 
 class DatabaseService {
   final String uid;
@@ -30,8 +31,8 @@ class DatabaseService {
     return FirebaseFirestore.instance.collection(path);
   }
 
-  Future<void> updateUserData(
-      String name, String email, String phone, String role) async {
+  Future<void> updateUserData(String name, String email, String phone,
+      String role, String profile) async {
     if (phone.length != 8) {
       throw Exception('Phone number must be 8 digits long');
     }
@@ -41,11 +42,17 @@ class DatabaseService {
       'email': email,
       'phone': phone,
       'role': role,
+      'profile': profile,
     });
   }
 
   Future<DocumentSnapshot> getUserData() async {
     return await _userCollection.doc(uid).get();
+  }
+
+  Future<Users> getUserDetails() async {
+    DocumentSnapshot doc = await _userCollection.doc(uid).get();
+    return Users.fromDocument(doc);
   }
 
   Future<DocumentSnapshot> getUserById(String id) async {

@@ -15,15 +15,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
-  Home({Key? key}) : super(key: key);
+  final AuthService auth;
+  final DatabaseService db;
+
+  Home({Key? key, required this.auth, required this.db}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  final AuthService auth = AuthService();
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   bool loading = false;
   late Future<String> userName;
   String? userId;
@@ -35,10 +36,8 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     userName = getUserName();
-    userId = _firebaseAuth.currentUser?.uid;
-    final DatabaseService db =
-        DatabaseService(uid: _firebaseAuth.currentUser?.uid ?? '');
-    userData = db.getUserData();
+    userId = widget.auth.currentUser?.uid;
+    userData = widget.db.getUserData();
     userData.then((docSnapshot) {
       Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
       userNamee = data['name'];
@@ -48,9 +47,8 @@ class _HomeState extends State<Home> {
   }
 
   Future<String> getUserName() async {
-    final User? user = _firebaseAuth.currentUser;
-    final DatabaseService db = DatabaseService(uid: user?.uid ?? '');
-    final DocumentSnapshot docSnapshot = await db.getUserData();
+    final User? user = widget.auth.currentUser;
+    final DocumentSnapshot docSnapshot = await widget.db.getUserData();
     return (docSnapshot.data() as Map<String, dynamic>)['name'] ?? 'User';
   }
 
@@ -254,8 +252,11 @@ class _MyAppointment extends StatelessWidget {
         title: 'My Appointments',
         action: 'View all',
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AppointmentPage()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AppointmentPage(
+                      auth: AuthService(), db: DatabaseService(uid: userId))));
         },
       ),
       StreamBuilder<QuerySnapshot>(
