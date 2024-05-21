@@ -1,15 +1,18 @@
 import 'package:dental_clinic/navigation/customer_nav.dart';
+import 'package:dental_clinic/screens/authenticate/authenticate.dart';
+import 'package:dental_clinic/screens/customer/dynamic_pages/health_record.dart';
 import 'package:dental_clinic/screens/customer/dynamic_pages/update_profile.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:async';
 
 class Profile extends StatelessWidget {
   final AuthService auth;
   final DatabaseService db;
 
-  Profile({Key? key, required this.auth, required this.db}) : super(key: key);
+  const Profile({super.key, required this.auth, required this.db});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +69,14 @@ class Profile extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                onTap: () {},
+                trailing: const Icon(Icons.arrow_forward_ios, size: 18.0),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            HealthRecordPage(userId: users.uid)),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 4.0),
@@ -80,6 +90,7 @@ class Profile extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 18.0),
                 onTap: () async {
                   await Navigator.push(
                     context,
@@ -104,9 +115,11 @@ class Profile extends StatelessWidget {
                   ),
                 ),
                 onTap: () async {
-                  // Sign out
                   await auth.signOut();
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => Authenticate()),
+                    (Route<dynamic> route) => false,
+                  );
                 },
               ),
             ),

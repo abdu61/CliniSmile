@@ -4,6 +4,7 @@ import 'package:dental_clinic/models/chat.dart';
 import 'package:dental_clinic/models/doctor.dart';
 import 'package:dental_clinic/models/feed.dart';
 import 'package:dental_clinic/models/appointment.dart';
+import 'package:dental_clinic/models/health.dart';
 import 'package:dental_clinic/models/services.dart';
 import 'package:dental_clinic/models/user.dart';
 
@@ -26,6 +27,8 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('services');
   final CollectionReference _chatsCollection =
       FirebaseFirestore.instance.collection('chats');
+  final CollectionReference _healthRecordsCollection =
+      FirebaseFirestore.instance.collection('healthRecords');
 
   CollectionReference collection(String path) {
     return FirebaseFirestore.instance.collection(path);
@@ -543,5 +546,41 @@ class DatabaseService {
             .where((message) => message != null)
             .toList()
             .cast<ChatMessage>());
+  }
+
+  // Health Records
+  Future<void> addHealthRecord(HealthRecord record) {
+    return _healthRecordsCollection.add(record.toMap());
+  }
+
+  Future<List<HealthRecord>> getHealthRecordsByUser(String userId) async {
+    final snapshot =
+        await _healthRecordsCollection.where('userId', isEqualTo: userId).get();
+
+    return snapshot.docs.map((doc) => HealthRecord.fromDocument(doc)).toList();
+  }
+
+  Future<void> updateHealthRecord(HealthRecord record) {
+    return _healthRecordsCollection.doc(record.id).update(record.toMap());
+  }
+
+  Future<void> deleteHealthRecordById(String id) {
+    return _healthRecordsCollection.doc(id).delete();
+  }
+
+  Future<void> deleteHealthRecord(HealthRecord record) {
+    return _healthRecordsCollection.doc(record.id).delete();
+  }
+
+  Stream<QuerySnapshot> getHealthRecordsByUserId(String userId) {
+    return _healthRecordsCollection
+        .where('userId', isEqualTo: userId)
+        .snapshots();
+  }
+
+  Future<List<HealthRecord>> getAllHealthRecords() async {
+    final snapshot = await _healthRecordsCollection.get();
+
+    return snapshot.docs.map((doc) => HealthRecord.fromDocument(doc)).toList();
   }
 }

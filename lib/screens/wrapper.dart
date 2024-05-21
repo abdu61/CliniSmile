@@ -30,7 +30,7 @@ class Wrapper extends StatelessWidget {
         future: authService.getUserRole(user.uid),
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Loading(); // Show a loading spinner while waiting
+            return const Loading(); // Show a loading spinner while waiting
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}'); // Show error if any
           } else {

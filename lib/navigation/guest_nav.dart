@@ -10,8 +10,7 @@ class GuestNav extends StatelessWidget {
   final AuthService auth;
   final DatabaseService db;
 
-  const GuestNav({Key? key, required this.auth, required this.db})
-      : super(key: key);
+  const GuestNav({super.key, required this.auth, required this.db});
 
   @override
   Widget build(BuildContext context) {

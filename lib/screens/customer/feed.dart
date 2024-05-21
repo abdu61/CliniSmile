@@ -1,8 +1,8 @@
-import 'package:dental_clinic/models/feed.dart';
-import 'package:dental_clinic/services/database.dart';
+import 'package:dental_clinic/navigation/customer_nav.dart';
 import 'package:dental_clinic/shared/loading.dart';
 import 'package:dental_clinic/shared/widgets/cards/feed_item_card.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class Feed extends StatefulWidget {
   const Feed({super.key});
@@ -12,34 +12,9 @@ class Feed extends StatefulWidget {
 }
 
 class _FeedState extends State<Feed> {
-  late Future<List<FeedItem>> futureFeedItems;
-
-  String category = 'All';
-  int _selectedIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    futureFeedItems = fetchFeedItems(category);
-  }
-
-  void updateCategory(String newCategory, int index) {
-    setState(() {
-      category = newCategory;
-      _selectedIndex = index;
-      futureFeedItems = fetchFeedItems(category);
-    });
-  }
-
-  Future<List<FeedItem>> fetchFeedItems(String category) async {
-    if (category == 'All') {
-      // Fetch all feed items
-      return DatabaseService(uid: '').getFeedItems();
-    } else {
-      // Fetch feed items by category
-      return DatabaseService(uid: '').getFeedItemsByCategory(category);
-    }
-  }
+  final CustomerNavigationController controller =
+      Get.find<CustomerNavigationController>();
+  int _categorySelectedIndex = 0; // Local state for category selection
 
   @override
   Widget build(BuildContext context) {
@@ -70,17 +45,18 @@ class _FeedState extends State<Feed> {
                   fillColor: const Color.fromARGB(255, 126, 156, 252),
                   selectedBorderColor: const Color.fromARGB(255, 126, 156, 252),
                   onPressed: (int index) {
-                    updateCategory(
-                      index == 0
-                          ? 'All'
-                          : index == 1
-                              ? 'offer'
-                              : 'general',
-                      index,
-                    );
+                    setState(() {
+                      _categorySelectedIndex = index;
+                    });
+                    String category = index == 0
+                        ? 'All'
+                        : index == 1
+                            ? 'offer'
+                            : 'general';
+                    controller.preloadFeedData(category);
                   },
-                  isSelected:
-                      List.generate(3, (index) => index == _selectedIndex),
+                  isSelected: List.generate(
+                      3, (index) => index == _categorySelectedIndex),
                   children: const <Widget>[
                     Padding(
                       padding:
@@ -117,36 +93,23 @@ class _FeedState extends State<Feed> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: FutureBuilder<List<FeedItem>>(
-                future: futureFeedItems,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    if (snapshot.data!.isEmpty) {
-                      // No feed items
-                      return const Center(child: Text('No feed items found.'));
-                    } else {
-                      // Display feed items
-                      return ListView.separated(
-                        itemCount: snapshot.data!.length,
-                        separatorBuilder: (BuildContext context, int index) =>
-                            const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          return FeedItemWidget(
-                              feedItem: snapshot.data![index]);
-                        },
-                      );
-                    }
-                  } else if (snapshot.hasError) {
-                    // Error occurred
-                    return const Center(
-                        child:
-                            Text('An error occurred. Please try again later.'));
-                  }
-
-                  // By default, show a loading
+              child: Obx(() {
+                if (controller.isLoading.value) {
                   return const Loading();
-                },
-              ),
+                }
+                if (controller.feedItems.isEmpty) {
+                  return const Center(child: Text('No feed items found.'));
+                }
+                return ListView.separated(
+                  itemCount: controller.feedItems.length,
+                  separatorBuilder: (BuildContext context, int index) =>
+                      const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
+                    return FeedItemWidget(
+                        feedItem: controller.feedItems[index]);
+                  },
+                );
+              }),
             ),
           ),
         ],

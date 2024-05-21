@@ -1,33 +1,33 @@
 import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/doctor.dart'; // Import your Doctor model
 import 'package:dental_clinic/screens/customer/dynamic_pages/update_appointment.dart';
-import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppointmentPage extends StatefulWidget {
-  final AuthService auth;
-  final DatabaseService db;
-
-  AppointmentPage({Key? key, required this.auth, required this.db})
-      : super(key: key);
+  AppointmentPage({super.key});
 
   @override
   State<AppointmentPage> createState() => _AppointmentPageState();
 }
 
 class _AppointmentPageState extends State<AppointmentPage> {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  late final DatabaseService dbService;
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    if (widget.auth.currentUser == null) {
+    final currentUser = _firebaseAuth.currentUser;
+    if (currentUser == null) {
       throw StateError('No current user');
     }
+    dbService = DatabaseService(uid: currentUser.uid);
   }
 
   Widget build(BuildContext context) {
@@ -105,8 +105,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: widget.db
-                  .getAppointmentsByUserid(widget.auth.currentUser!.uid),
+              stream: dbService.getAppointmentsByUserid(dbService.uid),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Text('Something went wrong');
@@ -149,7 +148,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           child: ListTile(
                             leading: FutureBuilder<Doctor>(
                               future:
-                                  widget.db.getDoctorById(appointment.doctorId),
+                                  dbService.getDoctorById(appointment.doctorId),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -172,7 +171,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             ),
                             title: FutureBuilder<Doctor>(
                               future:
-                                  widget.db.getDoctorById(appointment.doctorId),
+                                  dbService.getDoctorById(appointment.doctorId),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -267,7 +266,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                           const Text('Delete'),
                                                       onPressed: () async {
                                                         try {
-                                                          await widget.db
+                                                          await dbService
                                                               .deleteAppointmentById(
                                                                   appointment
                                                                       .id);

@@ -1,4 +1,5 @@
 import 'package:dental_clinic/services/database.dart';
+import 'package:dental_clinic/shared/widgets/coreComponents/button_style.dart';
 import 'package:flutter/material.dart';
 import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/services.dart';
@@ -105,7 +106,7 @@ class _StaffBillingPageState extends State<StaffBillingPage> {
         userId: widget.appointment.userId,
         start: widget.appointment.start,
         end: widget.appointment.end,
-        status: widget.appointment.status,
+        status: 'Closed',
         paymentMethod: paymentMethod ?? widget.appointment.paymentMethod,
         bookingTime: widget.appointment.bookingTime,
         consultationFee: consultationFee,
@@ -144,20 +145,20 @@ class _StaffBillingPageState extends State<StaffBillingPage> {
     return Scaffold(
       body: Center(
         child: Card(
-          margin: EdgeInsets.all(32.0),
+          margin: const EdgeInsets.all(32.0),
           child: Padding(
-            padding: EdgeInsets.all(32.0),
+            padding: const EdgeInsets.all(32.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Billing Page',
+                const Text('Billing Page',
                     style:
                         TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 Text(
                     'Consultation Fee: ${widget.appointment.paymentMethod == 'Cash' ? 'BD${consultationFee.toStringAsFixed(2)}' : 'Paid'}',
-                    style: TextStyle(fontSize: 20)),
-                SizedBox(height: 16.0),
+                    style: const TextStyle(fontSize: 20)),
+                const SizedBox(height: 16.0),
                 DropdownButton<Service>(
                   value: selectedService,
                   items: services.map((Service service) {
@@ -182,49 +183,55 @@ class _StaffBillingPageState extends State<StaffBillingPage> {
                 Text('Total with Tax: BD${totalWithTax.toStringAsFixed(2)}',
                     style: const TextStyle(fontSize: 20)),
                 const SizedBox(height: 16.0),
-                ElevatedButton(
+                CustomElevatedButton(
                   onPressed: addOtherCharge,
-                  child: const Text('Add Other Charge',
-                      style: TextStyle(fontSize: 20)),
+                  text: 'Add Other Charge',
                 ),
                 const SizedBox(height: 28.0),
                 ToggleButtons(
-                  isSelected: isSelected,
+                  isSelected: [
+                    paymentMethod == 'Cash',
+                    paymentMethod == 'Card'
+                  ],
                   onPressed: (int index) {
                     setState(() {
-                      for (int buttonIndex = 0;
-                          buttonIndex < isSelected.length;
-                          buttonIndex++) {
-                        if (buttonIndex == index) {
-                          isSelected[buttonIndex] = true;
-                          paymentMethod = buttonIndex == 0 ? 'Cash' : 'Card';
-                        } else {
-                          isSelected[buttonIndex] = false;
-                        }
-                      }
+                      paymentMethod = index == 0 ? 'Cash' : 'Card';
                     });
                   },
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: const Color.fromARGB(255, 0, 0, 0), // Default color
+                  selectedColor: Colors.white,
+                  fillColor: const Color.fromARGB(255, 126, 156, 252),
+                  borderColor: const Color.fromARGB(255, 126, 156, 252),
+                  selectedBorderColor: const Color.fromARGB(255, 126, 156, 252),
                   children: const <Widget>[
-                    Text('Cash'),
-                    Text('Card'),
+                    Padding(
+                      padding: EdgeInsets.all(50.0),
+                      child: Text('Cash',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18.0)),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(50.0),
+                      child: Text('Card',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18.0)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 28.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+                    CustomElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Back', style: TextStyle(fontSize: 20)),
+                      text: 'Back',
+                      color: const Color.fromARGB(255, 190, 190, 190),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        onPressed:
-                        processPayment();
-                      },
-                      child: const Text('Process Payment',
-                          style: TextStyle(fontSize: 20)),
-                    ),
+                    CustomElevatedButton(
+                      onPressed: processPayment,
+                      text: 'Process Payment',
+                    )
                   ],
                 ),
               ],

@@ -1,3 +1,5 @@
+import 'package:dental_clinic/models/appointment.dart';
+import 'package:dental_clinic/models/feed.dart';
 import 'package:dental_clinic/models/user.dart';
 import 'package:dental_clinic/screens/customer/appointment.dart';
 import 'package:dental_clinic/screens/customer/chat.dart';
@@ -79,25 +81,38 @@ class CustomerNavigationController extends GetxController
   final AuthService auth;
   final DatabaseService db;
   final Rx<int> selectedIndex = 0.obs;
+  final Rx<int> appointmentSelectedIndex = 0.obs;
   final List<Widget> screens;
   final RxBool isLoading = false.obs;
-  final Rx<Users?> user =
-      Rx<Users?>(null); // Add a variable to store the user data
+  final Rx<Users?> user = Rx<Users?>(null); // Variable to store the user data
+  final RxList<Appointment> appointments =
+      <Appointment>[].obs; // List to store appointments
+  final RxList<FeedItem> feedItems =
+      <FeedItem>[].obs; // List to store feed items
 
   CustomerNavigationController({required this.auth, required this.db})
       : screens = [
           Home(auth: auth, db: db),
-          AppointmentPage(auth: auth, db: db),
-          Feed(),
+          AppointmentPage(),
+          const Feed(),
           Chat(auth: auth, db: db),
           Profile(auth: auth, db: db),
         ];
+
+  void setAppointmentSelectedIndex(int index) {
+    appointmentSelectedIndex.value = index;
+  }
+
+  int getAppointmentSelectedIndex() {
+    return appointmentSelectedIndex.value;
+  }
 
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     preloadData();
+    preloadAppointmentData();
   }
 
   @override
@@ -106,38 +121,42 @@ class CustomerNavigationController extends GetxController
     super.onClose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-  }
-
   Future<void> preloadData() async {
     isLoading.value = true;
     // Preload data for each screen
     await Future.wait([
-      _preloadHomeData(),
-      _preloadAppointmentData(),
-      _preloadFeedData(),
-      _preloadChatData(),
-      preloadProfileData(),
+      preloadAppointmentData(),
+      preloadFeedData('All'), // Initial load with all categories
+      preloadProfileData(), // Changed to public method
     ]);
     isLoading.value = false;
   }
 
-  Future<void> _preloadHomeData() async {
-    // Add your data fetching logic here
+  Future<void> preloadAppointmentData() async {
+    try {
+      final appointmentDocs =
+          await db.getAppointmentsByUserid(auth.currentUser!.uid).first;
+      final fetchedAppointments = appointmentDocs.docs
+          .map((doc) => Appointment.fromFirestore(doc))
+          .toList();
+      appointments.value = fetchedAppointments;
+      update();
+    } catch (e) {
+      // Handle errors if necessary
+      print('Failed to load appointments: $e');
+    }
   }
 
-  Future<void> _preloadAppointmentData() async {
-    // Add your data fetching logic here
-  }
-
-  Future<void> _preloadFeedData() async {
-    // Add your data fetching logic here
-  }
-
-  Future<void> _preloadChatData() async {
-    // Add your data fetching logic here
+  Future<void> preloadFeedData(String category) async {
+    try {
+      final fetchedFeedItems = category == 'All'
+          ? await db.getFeedItems()
+          : await db.getFeedItemsByCategory(category);
+      feedItems.value = fetchedFeedItems;
+    } catch (e) {
+      // Handle errors if necessary
+      print('Failed to load feed items: $e');
+    }
   }
 
   Future<void> preloadProfileData() async {

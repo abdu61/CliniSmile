@@ -1,11 +1,13 @@
 import 'package:dental_clinic/models/appointment.dart';
 import 'package:dental_clinic/models/doctor.dart';
+import 'package:dental_clinic/models/health.dart';
 import 'package:dental_clinic/screens/staff/dynamic_pages/add_appointment_dialog.dart';
 import 'package:dental_clinic/screens/staff/staff_billing_page.dart';
 import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:dental_clinic/shared/loading.dart';
 import 'package:dental_clinic/shared/widgets/DateTime%20pickers/date_selector.dart';
+import 'package:dental_clinic/shared/widgets/coreComponents/button_style.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -295,7 +297,73 @@ class _StaffAppointmentState extends State<StaffAppointment> {
                                                 : Colors.red),
                                   ),
                                   const SizedBox(width: 20.0),
-                                  ElevatedButton(
+                                  CustomElevatedButton(
+                                    onPressed: () async {
+                                      final TextEditingController _controller =
+                                          TextEditingController();
+                                      return showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title:
+                                                const Text('Add Health Record'),
+                                            content: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: TextField(
+                                                controller: _controller,
+                                                decoration: const InputDecoration(
+                                                    hintText:
+                                                        "Enter health record details"),
+                                              ),
+                                            ),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                child: const Text('Cancel'),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              TextButton(
+                                                child: const Text('Submit'),
+                                                onPressed: () async {
+                                                  final String details =
+                                                      _controller.text;
+                                                  final String userId =
+                                                      appointments[index]
+                                                              .userId ??
+                                                          '';
+                                                  if (userId.isNotEmpty &&
+                                                      details.isNotEmpty) {
+                                                    HealthRecord record =
+                                                        HealthRecord(
+                                                      id: '', // Generate an ID for the record
+                                                      userId: userId,
+                                                      details: details,
+                                                      date: DateTime.now(),
+                                                    );
+                                                    await widget.databaseService
+                                                        .addHealthRecord(
+                                                            record);
+                                                    Navigator.of(context).pop();
+                                                  } else {
+                                                    // Handle the error when userId or details is empty
+                                                    print(
+                                                        'Error: User ID or details is empty');
+                                                  }
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    text: 'Add Record',
+                                  ),
+                                  const SizedBox(width: 20.0),
+
+                                  // Add a button to bill the customer
+                                  CustomElevatedButton(
                                     onPressed: () {
                                       Navigator.push(
                                         context,
@@ -309,34 +377,7 @@ class _StaffAppointmentState extends State<StaffAppointment> {
                                         ),
                                       );
                                     },
-                                    style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                        const Color.fromARGB(
-                                            255, 126, 156, 252),
-                                      ),
-                                      shape: MaterialStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                      ),
-                                      padding:
-                                          MaterialStateProperty.all<EdgeInsets>(
-                                        const EdgeInsets.all(30.0),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'Bill Customer',
-                                      style: TextStyle(
-                                        fontSize: 20.0,
-                                        color: Colors
-                                            .white, // Adjust the font size
-                                        fontWeight: FontWeight
-                                            .bold, // Adjust the font weight
-                                      ),
-                                    ),
+                                    text: 'Bill Customer',
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete,

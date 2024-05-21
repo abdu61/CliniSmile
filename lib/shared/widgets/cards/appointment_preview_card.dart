@@ -79,9 +79,7 @@ class AppointmentPreviewCard extends StatelessWidget {
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            const SizedBox(
-                                width:
-                                    20), // Add some space between the image and the text
+                            const SizedBox(width: 20),
                             Expanded(
                               // Use Expanded to prevent overflow of long text
                               child: Column(
@@ -128,7 +126,7 @@ class AppointmentPreviewCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 2),
                               const Icon(Icons.access_time,
                                   color: Colors.white),
                               const SizedBox(width: 10),

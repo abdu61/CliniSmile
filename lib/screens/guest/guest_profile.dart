@@ -1,3 +1,4 @@
+import 'package:dental_clinic/screens/authenticate/authenticate.dart';
 import 'package:flutter/material.dart';
 import 'package:dental_clinic/services/auth.dart';
 
@@ -38,6 +39,9 @@ class _GuestProfileState extends State<GuestProfile> {
                 await _auth.signOut();
                 if (mounted) {
                   setState(() => loading = false);
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => Authenticate()),
+                  );
                 }
               },
               style: ButtonStyle(

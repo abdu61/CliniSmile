@@ -3,7 +3,7 @@ import 'package:dental_clinic/screens/authenticate/sign_up.dart';
 import 'package:flutter/material.dart';
 
 class Authenticate extends StatefulWidget {
-  const Authenticate({Key? key}) : super(key: key);
+  const Authenticate({super.key});
 
   @override
   _AuthenticateState createState() => _AuthenticateState();
