@@ -6,7 +6,6 @@ import 'package:dental_clinic/services/auth.dart';
 import 'package:dental_clinic/services/database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:async';
 
 class Profile extends StatelessWidget {
   final AuthService auth;

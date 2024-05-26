@@ -27,19 +27,9 @@ class _DoctorCardState extends State<DoctorCard> {
 
     final moreInformation = [
       {
-        'icon': Icons.account_circle_outlined,
-        'label': 'Patients',
-        'value': widget.doctor.reviewCount,
-      },
-      {
         'icon': Icons.star_border,
         'label': 'Years Experience',
         'value': widget.doctor.experience,
-      },
-      {
-        'icon': Icons.favorite_border,
-        'label': 'Rating',
-        'value': widget.doctor.rating,
       },
     ];
 
