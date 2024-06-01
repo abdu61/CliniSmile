@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:dental_clinic/keys.dart';
 import 'package:dental_clinic/models/user.dart';
 import 'package:dental_clinic/screens/wrapper.dart';
 import 'package:dental_clinic/services/auth.dart';
@@ -10,12 +11,12 @@ import 'package:provider/provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'AIzaSyCADUjR8hCNuUpjghzaSUIXvC5nIBNGRlM',
-      appId: '1:244068860490:android:2aaa61c53beea556319cb3',
-      messagingSenderId: '244068860490',
-      projectId: 'dental-app-ab452',
-      storageBucket: 'dental-app-ab452.appspot.com',
+    options: FirebaseOptions(
+      apiKey: Keys.apiKey,
+      appId: Keys.appId,
+      messagingSenderId: Keys.messagingSenderId,
+      projectId: Keys.projectId,
+      storageBucket: Keys.storageBucket,
     ),
   );
 
