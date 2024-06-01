@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Intialize API Keys - Make a keys.dart file in the lib folder and add the API keys
   await Firebase.initializeApp(
     options: FirebaseOptions(
       apiKey: Keys.apiKey,
