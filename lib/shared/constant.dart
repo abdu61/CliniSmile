@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Search bar decoration
 const textInputDecoration = InputDecoration(
   contentPadding: EdgeInsets.all(15.0),
   fillColor: Colors.white,
@@ -26,6 +27,6 @@ final buttonAuthenticateStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(8.0), // Rounded corners
   ),
-  backgroundColor: Color(0xFF254EDB),
-  minimumSize: Size(double.infinity, 50),
+  backgroundColor: const Color(0xFF254EDB),
+  minimumSize: const Size(double.infinity, 50),
 );
