@@ -269,16 +269,10 @@ class _DoctorCategory extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: snapshot.data!.take(4).map((category) {
-                  IconData iconData;
-                  try {
-                    iconData = IconData(int.parse(category.icon),
-                        fontFamily: 'MaterialIcons');
-                  } catch (e) {
-                    iconData = Icons.error;
-                  }
                   return Expanded(
                     child: CategoryCircle(
-                      icon: iconData,
+                      iconData:
+                          getIcon(category.icon), // Pass the icon name here
                       label: category.name,
                       onTap: () {
                         Navigator.push(

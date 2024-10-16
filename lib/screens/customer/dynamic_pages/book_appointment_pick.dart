@@ -214,20 +214,39 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 widget.doctor!.workingHours[_weekdayToString(_date.weekday)]!,
                 widget.doctor!.breakHours[_weekdayToString(_date.weekday)]!)
             .map((time) {
-            final isBooked = _isTimeBooked(time);
+              final isBooked = _isTimeBooked(time);
 
-            // Return a TimeSelector widget
-            return TimeSelector(
-              time: time,
-              isBooked: isBooked,
-              isSelected: _time == time,
-              onTap: () {
-                setState(() {
-                  _time = time;
-                });
-              },
-            );
-          }).toList()
+              // Get the current time plus one hour
+              final DateTime now = DateTime.now();
+              final DateTime oneHourFromNow = now.add(Duration(hours: 1));
+
+              // Convert the TimeOfDay to a DateTime so we can compare it with oneHourFromNow
+              final DateTime timeAsDateTime = DateTime(
+                  now.year, now.month, now.day, time.hour, time.minute);
+
+              // Only add the time slot if it's at least one hour after the current time and the selected date is today
+              // or if the selected date is not today
+              if ((_date.day == now.day &&
+                      timeAsDateTime.isAfter(oneHourFromNow)) ||
+                  _date.day != now.day) {
+                // Return a TimeSelector widget
+                return TimeSelector(
+                  time: time,
+                  isBooked: isBooked,
+                  isSelected: _time == time,
+                  onTap: () {
+                    setState(() {
+                      _time = time;
+                    });
+                  },
+                );
+              } else {
+                return null;
+              }
+            })
+            .where((widget) => widget != null)
+            .cast<Widget>()
+            .toList()
         : [];
 
     return Scaffold(
