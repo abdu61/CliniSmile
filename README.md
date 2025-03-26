@@ -1,16 +1,9 @@
 # dental_clinic
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![home](https://github.com/user-attachments/assets/bf697b6d-a7ba-4114-add9-dbcd6cf15fb9)
+![login](https://github.com/user-attachments/assets/22a41e93-b274-45c9-a7e4-710879141d05)
+![appointment-1](https://github.com/user-attachments/assets/1a94c4f5-495a-4ce7-bcec-f2200e3abff4)
+![appointment-2](https://github.com/user-attachments/assets/dc06c370-d28c-49b7-bbeb-55797e233878)
+![appointment-3](https://github.com/user-attachments/assets/d4c8c90d-009f-4d3b-b8c7-2e3b4ef2021a)
+![appointment-4](https://github.com/user-attachments/assets/72d001d1-9543-4a0a-84de-8638f99e0399)
+![profile](https://github.com/user-attachments/assets/6edcabbf-700b-4f71-8aa2-53cdea9784bf)
